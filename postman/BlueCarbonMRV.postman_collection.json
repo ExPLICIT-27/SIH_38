@@ -1,0 +1,48 @@
+{
+  "info": {
+    "name": "Blue Carbon MRV",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Root",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": [""]
+        }
+      }
+    },
+    {
+      "name": "Health Live",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/health/live",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["health","live"]
+        }
+      }
+    },
+    {
+      "name": "Health Ready",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/health/ready",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["health","ready"]
+        }
+      }
+    }
+  ]
+}
+
