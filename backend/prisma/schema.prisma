@@ -124,3 +124,29 @@ model Verification {
   anchoredTx String?
   createdAt  DateTime @default(now())
 }
+
+model Listing {
+  id             String   @id @default(cuid())
+  creditAddress  String
+  tokenId        Int
+  pricePerUnit   Float
+  remaining      Int
+  createdAt      DateTime @default(now())
+  status         ListingStatus @default(ACTIVE)
+  orders         Order[]
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  listing     Listing  @relation(fields: [listingId], references: [id])
+  listingId   String
+  buyerWallet String
+  amount      Int
+  txHash      String
+  createdAt   DateTime @default(now())
+}
+
+enum ListingStatus {
+  ACTIVE
+  SOLD_OUT
+}

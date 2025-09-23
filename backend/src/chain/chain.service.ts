@@ -11,7 +11,13 @@ interface Deployed {
 @Injectable()
 export class ChainService {
   private provider = new ethers.JsonRpcProvider(process.env.RPC_URL || 'http://127.0.0.1:8545');
-  private wallet = new ethers.Wallet(process.env.PRIVATE_KEY || '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80', this.provider);
+
+  private getWallet(): ethers.Wallet {
+    return new ethers.Wallet(
+      process.env.PRIVATE_KEY || '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
+      this.provider,
+    );
+  }
 
   private loadArtifact(name: string) {
     const candidates = [
@@ -31,12 +37,14 @@ export class ChainService {
     const credit = this.loadArtifact('BlueCarbonCredit1155');
     const registry = this.loadArtifact('BlueCarbonRegistry');
 
-    const CreditFactory = new ethers.ContractFactory(credit.abi, credit.bytecode, this.wallet);
-    const creditContract = await CreditFactory.deploy();
+    const wallet = this.getWallet();
+    const CreditFactory = new ethers.ContractFactory(credit.abi, credit.bytecode, wallet);
+    const baseNonce = await this.provider.getTransactionCount(wallet.address);
+    const creditContract = await CreditFactory.deploy({ nonce: baseNonce });
     await creditContract.waitForDeployment();
 
-    const RegistryFactory = new ethers.ContractFactory(registry.abi, registry.bytecode, this.wallet);
-    const registryContract = await RegistryFactory.deploy();
+    const RegistryFactory = new ethers.ContractFactory(registry.abi, registry.bytecode, wallet);
+    const registryContract = await RegistryFactory.deploy({ nonce: baseNonce + 1 });
     await registryContract.waitForDeployment();
 
     return {
@@ -47,9 +55,10 @@ export class ChainService {
 
   async mint(creditAddress: string, to: string, id: bigint, amount: bigint): Promise<string> {
     const { abi } = this.loadArtifact('BlueCarbonCredit1155');
-    const contract = new ethers.Contract(creditAddress, abi, this.wallet);
+    const wallet = this.getWallet();
+    const contract = new ethers.Contract(creditAddress, abi, wallet);
     const MINTER_ROLE = ethers.keccak256(ethers.toUtf8Bytes('MINTER_ROLE'));
-    await contract.grantRole(MINTER_ROLE, this.wallet.address);
+    await contract.grantRole(MINTER_ROLE, wallet.address);
     const tx = await contract.mint(to, id, amount, '0x');
     const rec = await tx.wait();
     return rec?.hash ?? tx.hash;
@@ -57,7 +66,8 @@ export class ChainService {
 
   async retire(creditAddress: string, id: bigint, amount: bigint, reason: string): Promise<string> {
     const { abi } = this.loadArtifact('BlueCarbonCredit1155');
-    const contract = new ethers.Contract(creditAddress, abi, this.wallet);
+    const wallet = this.getWallet();
+    const contract = new ethers.Contract(creditAddress, abi, wallet);
     const tx = await contract.retire(id, amount, reason);
     const rec = await tx.wait();
     return rec?.hash ?? tx.hash;
@@ -65,7 +75,8 @@ export class ChainService {
 
   async anchor(registryAddress: string, uploadId: string, sha256Hex: string, cid: string): Promise<string> {
     const { abi } = this.loadArtifact('BlueCarbonRegistry');
-    const contract = new ethers.Contract(registryAddress, abi, this.wallet);
+    const wallet = this.getWallet();
+    const contract = new ethers.Contract(registryAddress, abi, wallet);
     const hex = sha256Hex?.startsWith('0x') ? sha256Hex : (`0x${sha256Hex}`);
     const tx = await contract.anchor(uploadId, hex as unknown as `0x${string}`, cid);
     const rec = await tx.wait();
