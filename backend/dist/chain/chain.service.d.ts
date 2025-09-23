@@ -4,7 +4,7 @@ interface Deployed {
 }
 export declare class ChainService {
     private provider;
-    private wallet;
+    private getWallet;
     private loadArtifact;
     deployDemo(): Promise<Deployed>;
     mint(creditAddress: string, to: string, id: bigint, amount: bigint): Promise<string>;

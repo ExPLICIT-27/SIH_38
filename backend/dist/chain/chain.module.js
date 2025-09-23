@@ -18,6 +18,7 @@ exports.ChainModule = ChainModule = __decorate([
     (0, common_1.Module)({
         providers: [chain_service_1.ChainService, prisma_service_1.PrismaService],
         controllers: [chain_controller_1.ChainController],
+        exports: [chain_service_1.ChainService],
     })
 ], ChainModule);
 //# sourceMappingURL=chain.module.js.map

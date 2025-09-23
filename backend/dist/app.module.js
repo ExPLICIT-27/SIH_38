@@ -21,6 +21,7 @@ const chain_module_1 = require("./chain/chain.module");
 const orgs_controller_1 = require("./orgs/orgs.controller");
 const projects_controller_1 = require("./projects/projects.controller");
 const registry_controller_1 = require("./registry/registry.controller");
+const market_controller_1 = require("./market/market.controller");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,7 +36,7 @@ exports.AppModule = AppModule = __decorate([
             uploads_module_1.UploadsModule,
             chain_module_1.ChainModule,
         ],
-        controllers: [app_controller_1.AppController, health_controller_1.HealthController, auth_controller_1.AuthController, orgs_controller_1.OrgsController, projects_controller_1.ProjectsController, registry_controller_1.RegistryController],
+        controllers: [app_controller_1.AppController, health_controller_1.HealthController, auth_controller_1.AuthController, orgs_controller_1.OrgsController, projects_controller_1.ProjectsController, registry_controller_1.RegistryController, market_controller_1.MarketController],
         providers: [app_service_1.AppService, prisma_service_1.PrismaService],
     })
 ], AppModule);

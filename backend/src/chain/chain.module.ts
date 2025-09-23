@@ -6,5 +6,6 @@ import { PrismaService } from '../prisma/prisma.service';
 @Module({
   providers: [ChainService, PrismaService],
   controllers: [ChainController],
+  exports: [ChainService],
 })
 export class ChainModule {}

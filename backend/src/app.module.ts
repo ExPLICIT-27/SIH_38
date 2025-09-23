@@ -12,6 +12,7 @@ import { ChainModule } from './chain/chain.module';
 import { OrgsController } from './orgs/orgs.controller';
 import { ProjectsController } from './projects/projects.controller';
 import { RegistryController } from './registry/registry.controller';
+import { MarketController } from './market/market.controller';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { RegistryController } from './registry/registry.controller';
     UploadsModule,
     ChainModule,
   ],
-  controllers: [AppController, HealthController, AuthController, OrgsController, ProjectsController, RegistryController],
+  controllers: [AppController, HealthController, AuthController, OrgsController, ProjectsController, RegistryController, MarketController],
   providers: [AppService, PrismaService],
 })
 export class AppModule {}
