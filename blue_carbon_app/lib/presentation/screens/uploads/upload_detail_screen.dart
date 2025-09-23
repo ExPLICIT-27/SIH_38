@@ -169,7 +169,7 @@ class UploadDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
             LinearProgressIndicator(
               value: 0.5,
-              backgroundColor: AppColors.oceanFoam,
+              backgroundColor: AppColors.seaFoam,
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.coastalTeal),
             ),
             const SizedBox(height: 8),
@@ -234,8 +234,8 @@ class UploadDetailScreen extends StatelessWidget {
         label = 'Pending';
         break;
       case UploadStatus.failed:
-        backgroundColor = AppColors.coralAccent.withOpacity(0.1);
-        textColor = AppColors.coralAccent;
+        backgroundColor = AppColors.coralPink.withOpacity(0.1);
+        textColor = AppColors.coralPink;
         label = 'Failed';
         break;
     }
@@ -280,7 +280,7 @@ class UploadDetailScreen extends StatelessWidget {
       case 'png':
         return AppColors.seagrassGreen;
       case 'pdf':
-        return AppColors.coralAccent;
+        return AppColors.coralPink;
       default:
         return AppColors.deepOceanBlue;
     }

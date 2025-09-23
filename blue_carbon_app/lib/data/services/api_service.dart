@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:blue_carbon_app/core/constants/api_constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:blue_carbon_app/data/models/models.dart';
 
 /// Service for handling API requests
@@ -25,11 +26,19 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Add auth token to requests if available
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString('access_token');
+          // Prefer Supabase session token if available
+          final client = supabase.Supabase.instance.client;
+          final token = client.auth.currentSession?.accessToken;
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
+            debugPrint('[Api] Using Supabase access token for ${options.method} ${options.path}');
+          } else {
+            final prefs = await SharedPreferences.getInstance();
+            final legacy = prefs.getString('access_token');
+            if (legacy != null) {
+              options.headers['Authorization'] = 'Bearer $legacy';
+              debugPrint('[Api] Using legacy access token for ${options.method} ${options.path}');
+            }
           }
           return handler.next(options);
         },
@@ -37,7 +46,7 @@ class ApiService {
           // Handle common errors
           if (error.response?.statusCode == 401) {
             // Handle unauthorized
-            debugPrint('Unauthorized: ${error.message}');
+            debugPrint('[Api] Unauthorized: ${error.message}');
           }
           return handler.next(error);
         },

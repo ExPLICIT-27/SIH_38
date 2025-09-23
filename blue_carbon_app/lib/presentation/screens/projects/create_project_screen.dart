@@ -164,7 +164,7 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
       height: 200,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.oceanFoam,
+        color: AppColors.seaFoam,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.deepOceanBlue.withOpacity(0.2)),
       ),

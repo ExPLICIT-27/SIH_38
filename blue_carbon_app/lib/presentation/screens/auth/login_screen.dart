@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
           } else if (state is AuthError) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: AppColors.coralAccent));
+            ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: AppColors.coralPink));
           }
         },
         child: SafeArea(
@@ -66,10 +66,38 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 40),
                     Center(
                       child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(color: AppColors.oceanFoam, borderRadius: BorderRadius.circular(16)),
-                        child: const Center(child: Icon(Icons.water_drop, size: 60, color: AppColors.deepOceanBlue)),
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: AppColors.coastalGradient,
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.coastalTeal.withOpacity(0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Icon(
+                              Icons.waves,
+                              size: 40,
+                              color: AppColors.pearlWhite.withOpacity(0.3),
+                            ),
+                            const Icon(
+                              Icons.water_drop,
+                              size: 60,
+                              color: AppColors.pearlWhite,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 40),

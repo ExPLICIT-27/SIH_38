@@ -31,14 +31,18 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width ?? double.infinity,
-      height: height ?? 50,
+      height: height ?? 56,
       child: isOutlined
           ? OutlinedButton(
               onPressed: isLoading ? null : onPressed,
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: backgroundColor ?? AppColors.coastalTeal),
-                padding: padding,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                side: BorderSide(
+                  color: backgroundColor ?? AppColors.coastalTeal,
+                  width: 1.5,
+                ),
+                padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
               ),
               child: _buildButtonContent(),
             )
@@ -46,8 +50,11 @@ class CustomButton extends StatelessWidget {
               onPressed: isLoading ? null : onPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: backgroundColor ?? AppColors.coastalTeal,
-                padding: padding,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                foregroundColor: textColor ?? AppColors.pearlWhite,
+                padding: padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 3,
+                shadowColor: (backgroundColor ?? AppColors.coastalTeal).withOpacity(0.3),
               ),
               child: _buildButtonContent(),
             ),
@@ -60,8 +67,9 @@ class CustomButton extends StatelessWidget {
         height: 20,
         width: 20,
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(isOutlined ? AppColors.coastalTeal : Colors.white),
-          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(
+              isOutlined ? (textColor ?? AppColors.coastalTeal) : (textColor ?? AppColors.pearlWhite)),
+          strokeWidth: 2.5,
         ),
       );
     }
@@ -69,15 +77,21 @@ class CustomButton extends StatelessWidget {
     if (icon != null) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: isOutlined ? (textColor ?? AppColors.coastalTeal) : (textColor ?? Colors.white), size: 18),
-          const SizedBox(width: 8),
+          Icon(
+            icon,
+            color: isOutlined ? (textColor ?? AppColors.coastalTeal) : (textColor ?? AppColors.pearlWhite),
+            size: 20,
+          ),
+          const SizedBox(width: 10),
           Text(
             label,
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: isOutlined ? (textColor ?? AppColors.coastalTeal) : (textColor ?? Colors.white),
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+              color: isOutlined ? (textColor ?? AppColors.coastalTeal) : (textColor ?? AppColors.pearlWhite),
             ),
           ),
         ],
@@ -88,8 +102,9 @@ class CustomButton extends StatelessWidget {
       label,
       style: TextStyle(
         fontSize: 16,
-        fontWeight: FontWeight.w500,
-        color: isOutlined ? (textColor ?? AppColors.coastalTeal) : (textColor ?? Colors.white),
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
+        color: isOutlined ? (textColor ?? AppColors.coastalTeal) : (textColor ?? AppColors.pearlWhite),
       ),
     );
   }

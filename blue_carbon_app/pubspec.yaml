@@ -16,6 +16,8 @@ dependencies:
   # Network & API
   dio: ^5.4.1
   json_annotation: ^4.8.1
+  # Supabase Auth
+  supabase_flutter: ^2.5.7
   # Storage
   shared_preferences: ^2.2.2
   # UI components

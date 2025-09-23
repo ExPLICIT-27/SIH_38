@@ -61,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.logout,
             isOutlined: true,
             backgroundColor: Colors.transparent,
-            textColor: AppColors.coralAccent,
+            textColor: AppColors.coralPink,
             onPressed: () {
               _showSignOutDialog();
             },
@@ -237,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.pop(context);
               context.read<AuthBloc>().add(LogoutEvent());
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.coralAccent),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.coralPink),
             child: const Text('Sign Out'),
           ),
         ],

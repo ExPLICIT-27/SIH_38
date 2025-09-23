@@ -71,7 +71,7 @@ class _SignupScreenState extends State<SignupScreen> {
           } else if (state is AuthError) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: AppColors.coralAccent));
+            ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: AppColors.coralPink));
           }
         },
         child: SafeArea(
