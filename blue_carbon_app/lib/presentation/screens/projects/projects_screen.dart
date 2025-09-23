@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:blue_carbon_app/core/theme/app_colors.dart';
 import 'package:blue_carbon_app/data/models/project_model.dart';
+import 'package:blue_carbon_app/data/services/api_service.dart';
 import 'package:blue_carbon_app/presentation/screens/projects/create_project_screen.dart';
 import 'package:blue_carbon_app/presentation/screens/projects/project_detail_screen.dart';
 import 'package:blue_carbon_app/presentation/widgets/project/project_card.dart';
@@ -24,44 +25,23 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
   }
 
   Future<void> _loadProjects() async {
-    // TODO: Replace with actual API call
-    await Future.delayed(const Duration(seconds: 1));
-
-    setState(() {
-      _projects = [
-        ProjectModel(
-          id: '1',
-          orgId: '1',
-          name: 'Mangrove Restoration - Sundarbans',
-          type: 'Mangrove',
-          areaHa: 150.5,
-          status: ProjectStatus.approved,
-          createdAt: DateTime.now().subtract(const Duration(days: 60)),
-          updatedAt: DateTime.now().subtract(const Duration(days: 30)),
-        ),
-        ProjectModel(
-          id: '2',
-          orgId: '1',
-          name: 'Seagrass Conservation - Gulf of Mannar',
-          type: 'Seagrass',
-          areaHa: 75.2,
-          status: ProjectStatus.approved,
-          createdAt: DateTime.now().subtract(const Duration(days: 45)),
-          updatedAt: DateTime.now().subtract(const Duration(days: 20)),
-        ),
-        ProjectModel(
-          id: '3',
-          orgId: '1',
-          name: 'Saltmarsh Restoration - Chilika Lake',
-          type: 'Saltmarsh',
-          areaHa: 95.8,
-          status: ProjectStatus.draft,
-          createdAt: DateTime.now().subtract(const Duration(days: 15)),
-          updatedAt: DateTime.now().subtract(const Duration(days: 5)),
-        ),
-      ];
-      _isLoading = false;
-    });
+    try {
+      final api = ApiService();
+      final items = await api.getProjects();
+      if (!mounted) return;
+      setState(() {
+        _projects = items;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: AppColors.coralPink),
+      );
+    }
   }
 
   List<ProjectModel> get _filteredProjects {
@@ -78,29 +58,93 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Projects'), backgroundColor: AppColors.deepOceanBlue),
       body: RefreshIndicator(
         onRefresh: _loadProjects,
         color: AppColors.coastalTeal,
-        child: Column(
-          children: [
-            _buildFilterChips(),
-            Expanded(
-              child: _isLoading
-                  ? _buildLoadingState()
-                  : _filteredProjects.isEmpty
-                  ? _buildEmptyState()
-                  : _buildProjectList(),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 160,
+              floating: false,
+              pinned: true,
+              backgroundColor: AppColors.deepOceanBlue,
+              flexibleSpace: FlexibleSpaceBar(
+                title: const Text(
+                  'Blue Carbon Projects',
+                  style: TextStyle(
+                    color: AppColors.pearlWhite,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                ),
+                background: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: AppColors.oceanDepthGradient,
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: -30,
+                        top: 20,
+                        child: Icon(
+                          Icons.eco,
+                          size: 120,
+                          color: AppColors.pearlWhite.withOpacity(0.1),
+                        ),
+                      ),
+                      Positioned(
+                        left: -20,
+                        bottom: 10,
+                        child: Icon(
+                          Icons.waves,
+                          size: 80,
+                          color: AppColors.pearlWhite.withOpacity(0.1),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  _buildFilterChips(),
+                  _isLoading
+                      ? _buildLoadingState()
+                      : _filteredProjects.isEmpty
+                          ? _buildEmptyState()
+                          : _buildProjectList(),
+                ],
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.coastalTeal,
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateProjectScreen()));
+        onPressed: () async {
+          final created =
+              await Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateProjectScreen()));
+          if (created == true) {
+            setState(() {
+              _isLoading = true;
+            });
+            await _loadProjects();
+          }
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add, color: AppColors.pearlWhite),
+        label: const Text(
+          'New Project',
+          style: TextStyle(
+            color: AppColors.pearlWhite,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }
@@ -175,18 +219,18 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
   }
 
   Widget _buildProjectList() {
-    return ListView.builder(
+    return Padding(
       padding: const EdgeInsets.all(16),
-      itemCount: _filteredProjects.length,
-      itemBuilder: (context, index) {
-        final project = _filteredProjects[index];
-        return ProjectCard(
-          project: project,
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => ProjectDetailScreen(project: project)));
-          },
-        );
-      },
+      child: Column(
+        children: _filteredProjects.map((project) {
+          return ProjectCard(
+            project: project,
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ProjectDetailScreen(project: project)));
+            },
+          );
+        }).toList(),
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:blue_carbon_app/core/theme/app_colors.dart';
 import 'package:blue_carbon_app/data/models/data_upload_model.dart';
 import 'package:blue_carbon_app/presentation/widgets/common/custom_button.dart';
+import 'package:blue_carbon_app/data/services/api_service.dart';
 
 class UploadDetailScreen extends StatelessWidget {
   final DataUploadModel upload;
@@ -36,11 +37,21 @@ class UploadDetailScreen extends StatelessWidget {
               CustomButton(
                 label: 'Request Verification',
                 icon: Icons.verified,
-                onPressed: () {
-                  // TODO: Implement verification request
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Verification request sent'), backgroundColor: Colors.green),
-                  );
+                onPressed: () async {
+                  try {
+                    final api = ApiService();
+                    await api.createVerification({'uploadId': upload.id});
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Verification request sent'), backgroundColor: Colors.green),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+                    }
+                  }
                 },
               ),
           ],
@@ -169,7 +180,7 @@ class UploadDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
             LinearProgressIndicator(
               value: 0.5,
-              backgroundColor: AppColors.oceanFoam,
+              backgroundColor: AppColors.seaFoam,
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.coastalTeal),
             ),
             const SizedBox(height: 8),
@@ -234,8 +245,8 @@ class UploadDetailScreen extends StatelessWidget {
         label = 'Pending';
         break;
       case UploadStatus.failed:
-        backgroundColor = AppColors.coralAccent.withOpacity(0.1);
-        textColor = AppColors.coralAccent;
+        backgroundColor = AppColors.coralPink.withOpacity(0.1);
+        textColor = AppColors.coralPink;
         label = 'Failed';
         break;
     }
@@ -280,7 +291,7 @@ class UploadDetailScreen extends StatelessWidget {
       case 'png':
         return AppColors.seagrassGreen;
       case 'pdf':
-        return AppColors.coralAccent;
+        return AppColors.coralPink;
       default:
         return AppColors.deepOceanBlue;
     }

@@ -40,3 +40,5 @@ coverage-*
 # Misc
 *.swp
 *.swo
+
+uploads/*

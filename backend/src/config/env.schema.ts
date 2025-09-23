@@ -11,6 +11,8 @@ const envSchema = z.object({
     .default('3000' as unknown as number),
   JWT_SECRET: z.string().default('devsecret'),
   JWT_EXPIRES_IN: z.string().default('1h'),
+  SUPABASE_URL: z.string().url().optional(),
+  SUPABASE_JWKS_URL: z.string().url().optional(),
 });
 
 export type AppEnv = z.infer<typeof envSchema> & { PORT: number };

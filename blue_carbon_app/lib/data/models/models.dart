@@ -5,3 +5,4 @@ export 'project_model.dart';
 export 'data_upload_model.dart';
 export 'verification_model.dart';
 export 'auth_models.dart';
+export 'transaction_model.dart';

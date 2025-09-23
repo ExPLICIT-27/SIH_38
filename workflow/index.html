@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blue Carbon MRV - Project Workflow</title>
+    <meta
+      name="description"
+      content="End-to-end workflow, architecture, and tech stack for the Blue Carbon MRV project presented for SIH." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="stars"></div>
+    <header class="site-header">
+      <div class="container">
+        <div class="brand">
+          <img src="assets/logo.svg" alt="Blue Carbon" class="logo" />
+          <span class="brand-name">Blue Carbon MRV</span>
+        </div>
+        <nav class="nav">
+          <a href="#overview">Overview</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#architecture">Architecture</a>
+          <a href="#timeline">Timeline</a>
+          <a href="#tech">Tech Stack</a>
+        </nav>
+        <button id="themeToggle" aria-label="Toggle dark mode" class="theme-toggle">🌙</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="hero">
+        <div class="container">
+          <div class="hero-content">
+            <h1><span class="accent">Blue Carbon</span> Monitoring, Reporting, and Verification</h1>
+            <p class="subtitle">
+              From field data collection to tokenized carbon credits — a secure, transparent, and
+              auditable pipeline designed for coastal ecosystems.
+            </p>
+            <div class="cta">
+              <a href="#workflow" class="btn btn-primary">See the Workflow</a>
+              <a href="#tech" class="btn btn-ghost">Explore the Tech</a>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <img src="assets/hero-illustration.svg" alt="Workflow Illustration" />
+          </div>
+        </div>
+        <div class="hero-glow"></div>
+      </section>
+
+      <section class="section" id="overview">
+        <div class="container">
+          <h2>What we’re building & why</h2>
+          <p class="lead">
+            Coastal blue carbon ecosystems (mangroves, seagrass, saltmarshes) lock away massive
+            amounts of carbon. We provide a trustworthy MRV pipeline that transforms on-ground
+            measurements into verifiable digital assets, enabling funding and accountability for
+            conservation.
+          </p>
+          <div class="cards">
+            <div class="card reveal">
+              <h3>Problem</h3>
+              <p>
+                MRV is fragmented: data lives in silos, verification is slow, and trust is hard to
+                earn.
+              </p>
+            </div>
+            <div class="card reveal">
+              <h3>Our Approach</h3>
+              <p>
+                Unify collection → verification → registry → tokenization with cryptographic proofs
+                and audit trails.
+              </p>
+            </div>
+            <div class="card reveal">
+              <h3>Impact</h3>
+              <p>
+                Faster credit issuance, transparent provenance, and incentives aligned for
+                restoration at scale.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="workflow">
+        <div class="container">
+          <h2>End‑to-End Workflow</h2>
+          <div class="flow-grid">
+            <div class="flow-step reveal">
+              <div class="step-index">1</div>
+              <h4>Project Setup</h4>
+              <p>
+                Define project boundaries, roles, and protocols in the backend. Create baseline
+                survey plans.
+              </p>
+            </div>
+            <div class="flow-step reveal">
+              <div class="step-index">2</div>
+              <h4>Data Collection (Mobile)</h4>
+              <p>
+                Flutter app captures field data, GPS, photos, and forms. Offline-first; syncs when
+                connected.
+              </p>
+            </div>
+            <div class="flow-step reveal">
+              <div class="step-index">3</div>
+              <h4>Uploads & Evidence</h4>
+              <p>Artifacts stored via backend to IPFS; content-addressed with immutable CIDs.</p>
+            </div>
+            <div class="flow-step reveal">
+              <div class="step-index">4</div>
+              <h4>Verification</h4>
+              <p>
+                Automated checks + reviewer approvals. Signatures and roles enforced with JWT +
+                guards.
+              </p>
+            </div>
+            <div class="flow-step reveal">
+              <div class="step-index">5</div>
+              <h4>Registry</h4>
+              <p>
+                Immutable registry entries with provenance linked to IPFS evidence, stored in
+                database and chain.
+              </p>
+            </div>
+            <div class="flow-step reveal">
+              <div class="step-index">6</div>
+              <h4>Tokenization</h4>
+              <p>
+                BlueCarbon ERC-1155 mints credits; transfers recorded onchain; metadata references
+                IPFS.
+              </p>
+            </div>
+          </div>
+
+          <div class="diagram reveal">
+            <img src="assets/workflow-diagram.svg" alt="Workflow Diagram" />
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="architecture">
+        <div class="container">
+          <h2>System Architecture</h2>
+          <div class="arch">
+            <div class="arch-col">
+              <h4>Clients</h4>
+              <ul>
+                <li>Flutter app (Android/iOS) - offline-first forms, media, GPS</li>
+                <li>Web dashboard (future) - verification, analytics</li>
+              </ul>
+              <h4>APIs</h4>
+              <ul>
+                <li>NestJS REST - auth, roles, uploads, projects, registry</li>
+                <li>JWT auth - role-based access control (guards and decorators)</li>
+              </ul>
+            </div>
+            <div class="arch-col">
+              <h4>Data & Storage</h4>
+              <ul>
+                <li>PostgreSQL (Prisma) - normalized project, org, upload, registry tables</li>
+                <li>IPFS - content-addressed artifacts, tamper evidence</li>
+              </ul>
+              <h4>Smart Contracts</h4>
+              <ul>
+                <li>ERC-1155 credits - batchable tokens for credit vintages</li>
+                <li>Registry contract - provenance and state transitions</li>
+              </ul>
+            </div>
+            <div class="arch-col">
+              <h4>Infra</h4>
+              <ul>
+                <li>Docker Compose - API, DB, IPFS gateway</li>
+                <li>CI friendly - tests, migrations, typegen</li>
+              </ul>
+              <h4>Security</h4>
+              <ul>
+                <li>JWT + RBAC - reviewers vs submitters</li>
+                <li>Content hashes - verify media integrity</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="timeline">
+        <div class="container">
+          <h2>Demo Timeline</h2>
+          <div class="timeline">
+            <div class="t-item reveal">
+              <span class="t-dot"></span>
+              <div>
+                <h4>Create Project</h4>
+                <p>Define area, stakeholders, methods.</p>
+              </div>
+            </div>
+            <div class="t-item reveal">
+              <span class="t-dot"></span>
+              <div>
+                <h4>Collect Field Data</h4>
+                <p>Photos, coordinates, survey forms.</p>
+              </div>
+            </div>
+            <div class="t-item reveal">
+              <span class="t-dot"></span>
+              <div>
+                <h4>Upload Evidence</h4>
+                <p>Push media to IPFS via backend.</p>
+              </div>
+            </div>
+            <div class="t-item reveal">
+              <span class="t-dot"></span>
+              <div>
+                <h4>Review & Verify</h4>
+                <p>Role-gated approvals and checks.</p>
+              </div>
+            </div>
+            <div class="t-item reveal">
+              <span class="t-dot"></span>
+              <div>
+                <h4>Register</h4>
+                <p>Write immutable entry with links.</p>
+              </div>
+            </div>
+            <div class="t-item reveal">
+              <span class="t-dot"></span>
+              <div>
+                <h4>Mint Credits</h4>
+                <p>Issue ERC-1155 tokens to project.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="tech">
+        <div class="container">
+          <h2>Tech Stack</h2>
+          <div class="tech-grid">
+            <div class="tech reveal">
+              <img src="assets/icons/flutter.svg" alt="Flutter" />
+              <h4>Flutter</h4>
+              <p>Cross-platform app for data capture with offline capabilities.</p>
+            </div>
+            <div class="tech reveal">
+              <img src="assets/icons/nest.svg" alt="NestJS" />
+              <h4>NestJS</h4>
+              <p>Typed backend with auth, uploads, and MRV endpoints.</p>
+            </div>
+            <div class="tech reveal">
+              <img src="assets/icons/postgres.svg" alt="PostgreSQL" />
+              <h4>PostgreSQL + Prisma</h4>
+              <p>Reliable relational store backing projects, uploads, registry.</p>
+            </div>
+            <div class="tech reveal">
+              <img src="assets/icons/ipfs.svg" alt="IPFS" />
+              <h4>IPFS</h4>
+              <p>Content-addressed storage to ensure artifact integrity.</p>
+            </div>
+            <div class="tech reveal">
+              <img src="assets/icons/solidity.svg" alt="Solidity" />
+              <h4>Solidity</h4>
+              <p>ERC-1155 credit issuance and on-chain provenance.</p>
+            </div>
+            <div class="tech reveal">
+              <img src="assets/icons/docker.svg" alt="Docker" />
+              <h4>Docker</h4>
+              <p>Reproducible local environment with compose.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <span>© 2025 Blue Carbon MRV • Built for SIH</span>
+        <a href="#hero" class="back-to-top">Back to top ↑</a>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

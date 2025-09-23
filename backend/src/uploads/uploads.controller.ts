@@ -1,4 +1,12 @@
-import { Controller, Post, UploadedFile, UseInterceptors, Body, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+  Body,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createHash } from 'crypto';
 import { readFileSync } from 'fs';
@@ -10,7 +18,11 @@ import { Param, Get, NotFoundException } from '@nestjs/common';
 @ApiTags('Uploads')
 @Controller('v1/uploads')
 export class UploadsController {
-  constructor(private prisma: PrismaService, private ipfs: IpfsService) {}
+  private readonly logger = new Logger(UploadsController.name);
+  constructor(
+    private prisma: PrismaService,
+    private ipfs: IpfsService,
+  ) {}
 
   @Post()
   @ApiConsumes('multipart/form-data')
@@ -32,6 +44,7 @@ export class UploadsController {
     @Body('metadata') metadataJson?: string,
   ) {
     if (!file) throw new BadRequestException('file is required');
+    this.logger.log(`Uploading file ${file.originalname} (${file.size} bytes)`);
     const content = file.buffer ?? readFileSync(file.path);
     const sha256 = createHash('sha256').update(content).digest('hex');
     let metadata: any = undefined;
@@ -44,18 +57,22 @@ export class UploadsController {
     }
     // Try to pin to IPFS (optional)
     const cid = await this.ipfs.pinFile(file.path, file.originalname);
+    this.logger.log(`IPFS pin result cid=${cid ?? 'null'}`);
     const record = await this.prisma.dataUpload.create({
       data: {
         fileName: file.originalname,
         storagePath: file.path,
         sha256,
         size: file.size,
-        capturedAt: capturedAt ? new Date(Number(capturedAt) * 1000) : undefined,
+        capturedAt: capturedAt
+          ? new Date(Number(capturedAt) * 1000)
+          : undefined,
         metadata,
         cid: cid ?? undefined,
         status: cid ? 'PINNED' : 'PENDING',
       },
     });
+    this.logger.log(`Upload saved id=${record.id} sha256=${sha256}`);
     return { id: record.id, sha256, path: file.path, cid: record.cid };
   }
 
@@ -67,5 +84,3 @@ export class UploadsController {
     return record;
   }
 }
-
-

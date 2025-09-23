@@ -21,6 +21,8 @@ Auth: Keycloak (self-host) or Firebase Auth (faster demo); SIWE for wallet linki
 DevOps: Docker Compose for local, Terraform (optional), Nginx reverse proxy
 Security: JWT (short-lived), rotating secrets, role-based access control
 Flutter: REST client (OpenAPI-generated), web_socket_channel, web3dart or WalletConnect, file_picker, camera, geolocator, dio
+
+
 Core data model (DB)
 users: id, email/phone, auth_provider, wallet_address (nullable), role
 organizations: id, type (NGO/community/panchayat), KYC_status, admin_user_id
@@ -34,6 +36,8 @@ carbon_batches: id, project_id, vintage_year, methodology_code, emission_reducti
 audit_logs: id, actor_user_id, action, entity, entity_id, diff_json, created_at
 token_transfers: id, token_id, from, to, amount, tx_hash, block_number
 settings: key, value_json
+
+
 Smart contracts
 Roles: DEFAULT_ADMIN_ROLE (NCCR multi-sig), VERIFIER_ROLE (NCCR-appointed), ISSUER_ROLE (registry), ORG_ROLE (optional tagging)
 Contracts:
@@ -42,11 +46,15 @@ BlueCarbonCredit1155: ERC-1155 token representing tCO2e batches by tokenId (per 
 Token decimals: 2 (centi-ton) or 3 (kg-based), decide and be consistent.
 Minimal ERC-1155 interface sketch:
 EIP-712 typed data (field data attestation) for client-side signing:
+
+
 End-to-end workflows
 Onboarding (NGO/community/panchayat)
 1) Admin creates organization and invites users.
 2) KYC docs uploaded to IPFS; hash stored off-chain; status set by NCCR.
 3) Optional: register org wallet on-chain in BlueCarbonRegistry.
+
+
 Project creation
 Org submits project with polygon, baseline year, methodology; NCCR approves.
 Field/drone data capture
@@ -57,6 +65,8 @@ Verification and anchoring
 Verifier reviews data; runs calculator; attaches notes and evidence CID.
 On approval, backend calls BlueCarbonRegistry.anchorMRV(projectId, cid, sha256, meta) with VERIFIER_ROLE.
 Event emitted and saved to DB.
+
+
 Tokenization
 Backend computes emission_reduction_tco2e per methodology; mints ERC-1155 via MINTER_ROLE to org/beneficiary; sets tokenURI to batch metadata CID.
 Transfer/retire
@@ -64,6 +74,8 @@ Wallet-to-wallet transfer (standard ERC-1155) or gasless meta-tx.
 Retirement uses retire(id, amount, reason), records event; backend indexes.
 Registry view
 Public endpoints display on-chain anchored hashes, CIDs, verifier, and credit status.
+
+
 APIs (REST, versioned)
 Auth
 POST /v1/auth/signup, /v1/auth/login
@@ -89,8 +101,11 @@ GET /v1/registry/projects/:id (on-chain + off-chain view)
 GET /v1/registry/batches/:tokenId
 Realtime
 WS /v1/ws topics: upload.status, verification.status, chain.tx, batch.minted, batch.retired
+
+
 Example upload request:
 OpenAPI stub to generate Flutter client:
+
 Carbon calculation (methodology module)
 Start with a transparent, auditable baseline:
 Mangroves: tCO2e = area_ha × biomass_growth_rate × carbon_fraction × permanence_factor − leakage

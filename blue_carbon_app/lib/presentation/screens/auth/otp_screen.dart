@@ -5,13 +5,25 @@ import 'package:blue_carbon_app/core/theme/app_colors.dart';
 import 'package:blue_carbon_app/presentation/blocs/auth/auth_bloc.dart';
 import 'package:blue_carbon_app/presentation/screens/home/home_screen.dart';
 import 'package:blue_carbon_app/presentation/widgets/common/custom_button.dart';
+import 'package:blue_carbon_app/data/models/models.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
   final bool isSignup;
   final String? name;
+  final Map<String, dynamic>? organizationData;
+  final OrganizationModel? selectedOrganization;
+  final UserRole? selectedRole;
 
-  const OtpScreen({super.key, required this.email, this.isSignup = false, this.name});
+  const OtpScreen({
+    super.key,
+    required this.email,
+    this.isSignup = false,
+    this.name,
+    this.organizationData,
+    this.selectedOrganization,
+    this.selectedRole,
+  });
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -43,7 +55,15 @@ class _OtpScreenState extends State<OtpScreen> {
     }
 
     if (widget.isSignup && widget.name != null) {
-      context.read<AuthBloc>().add(SignupEvent(widget.email, otp, widget.name!));
+      // For signup, we need to handle organization creation/joining
+      context.read<AuthBloc>().add(SignupEvent(
+            widget.email,
+            otp,
+            widget.name!,
+            organizationData: widget.organizationData,
+            selectedOrganization: widget.selectedOrganization,
+            selectedRole: widget.selectedRole ?? UserRole.member,
+          ));
     } else {
       context.read<AuthBloc>().add(LoginEvent(widget.email, otp));
     }
@@ -73,7 +93,7 @@ class _OtpScreenState extends State<OtpScreen> {
           } else if (state is AuthError) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: AppColors.coralAccent));
+            ).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: AppColors.coralPink));
           }
         },
         child: SafeArea(

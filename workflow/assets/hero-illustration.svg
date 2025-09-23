@@ -1,0 +1,27 @@
+<svg width="960" height="640" viewBox="0 0 960 640" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5CE1E6"/>
+      <stop offset="1" stop-color="#7AA2FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="640" rx="24" fill="#0c1330"/>
+  <g opacity=".9">
+    <circle cx="220" cy="120" r="6" fill="url(#glow)"/>
+    <circle cx="820" cy="160" r="6" fill="url(#glow)"/>
+    <circle cx="320" cy="520" r="6" fill="url(#glow)"/>
+    <circle cx="680" cy="420" r="6" fill="url(#glow)"/>
+  </g>
+  <g stroke="url(#glow)" stroke-opacity=".4">
+    <path d="M120 480 C 220 420, 300 380, 420 360 S 700 320, 840 200" />
+  </g>
+  <g>
+    <rect x="120" y="120" width="220" height="120" rx="14" fill="#0e1739" stroke="rgba(255,255,255,0.1)"/>
+    <rect x="380" y="240" width="220" height="120" rx="14" fill="#0e1739" stroke="rgba(255,255,255,0.1)"/>
+    <rect x="640" y="120" width="220" height="120" rx="14" fill="#0e1739" stroke="rgba(255,255,255,0.1)"/>
+    <rect x="240" y="420" width="220" height="120" rx="14" fill="#0e1739" stroke="rgba(255,255,255,0.1)"/>
+    <rect x="520" y="420" width="220" height="120" rx="14" fill="#0e1739" stroke="rgba(255,255,255,0.1)"/>
+  </g>
+</svg>
+
+

@@ -20,6 +20,7 @@ class UserModel extends Equatable {
   final String id;
   final String email;
   final UserRole role;
+  final String? orgId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -27,6 +28,7 @@ class UserModel extends Equatable {
     required this.id,
     required this.email,
     required this.role,
+    this.orgId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -36,5 +38,5 @@ class UserModel extends Equatable {
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
   @override
-  List<Object?> get props => [id, email, role, createdAt, updatedAt];
+  List<Object?> get props => [id, email, role, orgId, createdAt, updatedAt];
 }

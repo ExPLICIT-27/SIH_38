@@ -13,57 +13,71 @@ class UploadCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  _buildFileTypeIcon(),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          upload.fileName,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatFileSize(upload.size),
-                          style: TextStyle(fontSize: 14, color: AppColors.charcoal.withOpacity(0.7)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _buildStatusChip(),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Divider(height: 1),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildInfoItem(
-                    Icons.calendar_today,
-                    _formatDate(upload.capturedAt ?? upload.createdAt),
-                    upload.capturedAt != null ? 'Captured' : 'Uploaded',
-                  ),
-                  if (upload.cid != null) _buildInfoItem(Icons.link, _formatCid(upload.cid!), 'CID'),
-                  _buildInfoItem(Icons.fingerprint, _formatHash(upload.sha256), 'SHA-256'),
-                ],
-              ),
+      elevation: 4,
+      shadowColor: AppColors.deepOceanBlue.withOpacity(0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.pearlWhite,
+              AppColors.lightGray.withOpacity(0.3),
             ],
+          ),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _buildFileTypeIcon(),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            upload.fileName,
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _formatFileSize(upload.size),
+                            style: TextStyle(fontSize: 14, color: AppColors.charcoal.withOpacity(0.7)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildStatusChip(),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Divider(height: 1),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildInfoItem(
+                      Icons.calendar_today,
+                      _formatDate(upload.capturedAt ?? upload.createdAt),
+                      upload.capturedAt != null ? 'Captured' : 'Uploaded',
+                    ),
+                    if (upload.cid != null) _buildInfoItem(Icons.link, _formatCid(upload.cid!), 'CID'),
+                    _buildInfoItem(Icons.fingerprint, _formatHash(upload.sha256), 'SHA-256'),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -72,7 +86,7 @@ class UploadCard extends StatelessWidget {
 
   Widget _buildFileTypeIcon() {
     IconData iconData;
-    Color iconColor;
+    List<Color> gradientColors;
 
     final extension = upload.fileName.split('.').last.toLowerCase();
 
@@ -80,28 +94,42 @@ class UploadCard extends StatelessWidget {
       case 'zip':
       case 'gz':
         iconData = Icons.folder_zip;
-        iconColor = AppColors.coastalTeal;
+        gradientColors = AppColors.coastalGradient;
         break;
       case 'jpg':
       case 'jpeg':
       case 'png':
         iconData = Icons.image;
-        iconColor = AppColors.seagrassGreen;
+        gradientColors = [AppColors.seagrassGreen, AppColors.kelp];
         break;
       case 'pdf':
         iconData = Icons.picture_as_pdf;
-        iconColor = AppColors.coralAccent;
+        gradientColors = [AppColors.coralPink, AppColors.warning];
         break;
       default:
         iconData = Icons.insert_drive_file;
-        iconColor = AppColors.deepOceanBlue;
+        gradientColors = [AppColors.deepOceanBlue, AppColors.abyssalBlue];
     }
 
     return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(color: iconColor.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-      child: Icon(iconData, color: iconColor, size: 24),
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: gradientColors,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: gradientColors.first.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Icon(iconData, color: AppColors.pearlWhite, size: 28),
     );
   }
 
@@ -109,31 +137,56 @@ class UploadCard extends StatelessWidget {
     Color backgroundColor;
     Color textColor;
     String label;
+    IconData icon;
 
     switch (upload.status) {
       case UploadStatus.pinned:
-        backgroundColor = AppColors.seagrassGreen.withOpacity(0.1);
-        textColor = AppColors.seagrassGreen;
+        backgroundColor = AppColors.sequestrationGreen;
+        textColor = AppColors.pearlWhite;
         label = 'Pinned';
+        icon = Icons.push_pin;
         break;
       case UploadStatus.pending:
-        backgroundColor = AppColors.coastalTeal.withOpacity(0.1);
-        textColor = AppColors.coastalTeal;
-        label = 'Pending';
+        backgroundColor = AppColors.monitoringPurple;
+        textColor = AppColors.pearlWhite;
+        label = 'Processing';
+        icon = Icons.hourglass_empty;
         break;
       case UploadStatus.failed:
-        backgroundColor = AppColors.coralAccent.withOpacity(0.1);
-        textColor = AppColors.coralAccent;
+        backgroundColor = AppColors.coralPink;
+        textColor = AppColors.pearlWhite;
         label = 'Failed';
+        icon = Icons.error;
         break;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(color: backgroundColor, borderRadius: BorderRadius.circular(16)),
-      child: Text(
-        label,
-        style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.w500),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: backgroundColor.withOpacity(0.3),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: textColor, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: textColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

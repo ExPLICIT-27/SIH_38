@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:blue_carbon_app/core/constants/api_constants.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:blue_carbon_app/data/models/models.dart';
 
 /// Service for handling API requests
@@ -25,11 +26,19 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // Add auth token to requests if available
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString('access_token');
+          // Prefer Supabase session token if available
+          final client = supabase.Supabase.instance.client;
+          final token = client.auth.currentSession?.accessToken;
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
+            debugPrint('[Api] Using Supabase access token for ${options.method} ${options.path}');
+          } else {
+            final prefs = await SharedPreferences.getInstance();
+            final legacy = prefs.getString('access_token');
+            if (legacy != null) {
+              options.headers['Authorization'] = 'Bearer $legacy';
+              debugPrint('[Api] Using legacy access token for ${options.method} ${options.path}');
+            }
           }
           return handler.next(options);
         },
@@ -37,7 +46,7 @@ class ApiService {
           // Handle common errors
           if (error.response?.statusCode == 401) {
             // Handle unauthorized
-            debugPrint('Unauthorized: ${error.message}');
+            debugPrint('[Api] Unauthorized: ${error.message}');
           }
           return handler.next(error);
         },
@@ -65,6 +74,7 @@ class ApiService {
         id: (payload['sub'] ?? payload['userId'] ?? '') as String,
         email: (payload['email'] ?? '') as String,
         role: _mapUserRole(roleClaim),
+        orgId: (payload['orgId'] as String?),
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -150,6 +160,36 @@ class ApiService {
   }
 
   // Upload methods
+  Future<List<DataUploadModel>> getUploads() async {
+    try {
+      final response = await _dio.get(ApiConstants.uploads);
+      final data = response.data;
+      final List<dynamic> list = data is List
+          ? data
+          : (data is Map<String, dynamic> && data['items'] is List)
+              ? (data['items'] as List)
+              : <dynamic>[];
+      return list.map((json) => DataUploadModel.fromJson(json as Map<String, dynamic>)).toList();
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<List<DataUploadModel>> getUploadsByProjectId(String projectId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.uploadsByProject}$projectId');
+      final data = response.data;
+      final List<dynamic> list = data is List
+          ? data
+          : (data is Map<String, dynamic> && data['items'] is List)
+              ? (data['items'] as List)
+              : <dynamic>[];
+      return list.map((json) => DataUploadModel.fromJson(json as Map<String, dynamic>)).toList();
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   Future<DataUploadModel> uploadFile(File file, Map<String, dynamic> metadata) async {
     try {
       final formData = FormData.fromMap({
@@ -186,18 +226,58 @@ class ApiService {
     }
   }
 
+  // Transaction methods
+  Future<List<TransactionModel>> getTransactions() async {
+    try {
+      final response = await _dio.get(ApiConstants.transactions);
+      final data = response.data;
+      final List<dynamic> list = data is List
+          ? data
+          : (data is Map<String, dynamic> && data['items'] is List)
+              ? (data['items'] as List)
+              : <dynamic>[];
+      return list.map((json) => TransactionModel.fromJson(json as Map<String, dynamic>)).toList();
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<List<TransactionModel>> getTransactionsByOrgId(String orgId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.transactionsByOrg}$orgId');
+      final data = response.data;
+      final List<dynamic> list = data is List
+          ? data
+          : (data is Map<String, dynamic> && data['items'] is List)
+              ? (data['items'] as List)
+              : <dynamic>[];
+      return list.map((json) => TransactionModel.fromJson(json as Map<String, dynamic>)).toList();
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> getOrgTransactionSummary(String orgId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.transactionsByOrg}$orgId/summary');
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
   // Verification methods
   Future<VerificationModel> createVerification(Map<String, dynamic> data) async {
     try {
       // Backend exposes verification under /v1/registry/verify
-      final response = await _dio.post('${ApiConstants.registry}/verify', data: data);
+      final response = await _dio.post(ApiConstants.registryVerify, data: data);
       return VerificationModel.fromJson(response.data);
     } catch (e) {
       throw _handleError(e);
     }
   }
 
-  // No separate anchor endpoint in backend; anchoring is part of verification payload
+  // Chain anchoring is available via POST /v1/chain/anchor
 
   // Error handling
   Exception _handleError(dynamic error) {
@@ -206,9 +286,10 @@ class ApiService {
         return const SocketException('Connection timeout');
       }
 
-      if (error.response != null) {
-        final statusCode = error.response!.statusCode;
-        final data = error.response!.data;
+      final response = error.response;
+      if (response != null) {
+        final statusCode = response.statusCode;
+        final data = response.data;
 
         if (statusCode == 401) {
           return Exception('Unauthorized');

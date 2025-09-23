@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -15,47 +15,54 @@ model User {
   id            String   @id @default(cuid())
   email         String   @unique
   role          Role     @default(MEMBER)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime @default(now()) @map("createdAt")
+  updatedAt     DateTime @updatedAt @map("updatedAt")
   organizations OrgMember[]
   uploads       DataUpload[]
+
+  @@map("User")
 }
 
 model Organization {
-  id        String      @id @default(cuid())
-  name      String
-  type      String
-  mode      Mode        @default(SELLER)
-  walletAddress String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  members   OrgMember[]
-  projects  Project[]
+  id            String   @id @default(cuid())
+  name          String
+  type          String
+  mode          Mode     @default(SELLER)
+  walletAddress String?  @map("walletAddress")
+  createdAt     DateTime @default(now()) @map("createdAt")
+  updatedAt     DateTime @updatedAt @map("updatedAt")
+  members       OrgMember[]
+  projects      Project[]
+
+  @@map("Organization")
 }
 
 model OrgMember {
   id        String       @id @default(cuid())
   user      User         @relation(fields: [userId], references: [id])
-  userId    String
+  userId    String       @map("userId")
   org       Organization @relation(fields: [orgId], references: [id])
-  orgId     String
+  orgId     String       @map("orgId")
   role      String
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime     @default(now()) @map("createdAt")
+  updatedAt DateTime     @updatedAt @map("updatedAt")
 
   @@unique([userId, orgId])
+  @@map("OrgMember")
 }
 
 model Project {
-  id        String       @id @default(cuid())
-  org       Organization @relation(fields: [orgId], references: [id])
-  orgId     String
+  id        String        @id @default(cuid())
+  org       Organization  @relation(fields: [orgId], references: [id])
+  orgId     String        @map("orgId")
   name      String
   type      String
-  areaHa    Float        @default(0)
+  areaHa    Float         @default(0) @map("areaHa")
   status    ProjectStatus @default(DRAFT)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  createdAt DateTime      @default(now()) @map("createdAt")
+  updatedAt DateTime      @updatedAt @map("updatedAt")
+
+  @@map("Project")
 }
 
 enum Role {
@@ -69,27 +76,30 @@ model OtpCode {
   id         String   @id @default(cuid())
   email      String
   code       String
-  expiresAt  DateTime
+  expiresAt  DateTime @map("expiresAt")
   consumed   Boolean  @default(false)
-  createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now()) @map("createdAt")
 
   @@index([email])
+  @@map("OtpCode")
 }
 
 model DataUpload {
   id           String        @id @default(cuid())
   user         User?         @relation(fields: [userId], references: [id])
-  userId       String?
-  fileName     String
-  storagePath  String
+  userId       String?       @map("userId")
+  fileName     String        @map("fileName")
+  storagePath  String        @map("storagePath")
   sha256       String
   size         Int
-  capturedAt   DateTime?
+  capturedAt   DateTime?     @map("capturedAt")
   metadata     Json?
   cid          String?
   status       UploadStatus  @default(PENDING)
-  createdAt    DateTime      @default(now())
+  createdAt    DateTime      @default(now()) @map("createdAt")
   verifications Verification[]
+
+  @@map("DataUpload")
 }
 
 enum UploadStatus {
@@ -111,39 +121,47 @@ enum ProjectStatus {
 
 model Setting {
   key      String  @id
-  value    Json?
-  updatedAt DateTime @updatedAt
+  value    Json?   @map("value")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+
+  @@map("Setting")
 }
 
 model Verification {
   id         String   @id @default(cuid())
   upload     DataUpload @relation(fields: [uploadId], references: [id])
-  uploadId   String
+  uploadId   String   @map("uploadId")
   approved   Boolean
   notes      String?
-  anchoredTx String?
-  createdAt  DateTime @default(now())
+  anchoredTx String?  @map("anchoredTx")
+  createdAt  DateTime @default(now()) @map("createdAt")
+
+  @@map("Verification")
 }
 
 model Listing {
   id             String   @id @default(cuid())
-  creditAddress  String
-  tokenId        Int
-  pricePerUnit   Float
+  creditAddress  String   @map("creditAddress")
+  tokenId        Int      @map("tokenId")
+  pricePerUnit   Float    @map("pricePerUnit")
   remaining      Int
-  createdAt      DateTime @default(now())
+  createdAt      DateTime @default(now()) @map("createdAt")
   status         ListingStatus @default(ACTIVE)
   orders         Order[]
+
+  @@map("Listing")
 }
 
 model Order {
   id          String   @id @default(cuid())
   listing     Listing  @relation(fields: [listingId], references: [id])
-  listingId   String
-  buyerWallet String
+  listingId   String   @map("listingId")
+  buyerWallet String   @map("buyerWallet")
   amount      Int
-  txHash      String
-  createdAt   DateTime @default(now())
+  txHash      String   @map("txHash")
+  createdAt   DateTime @default(now()) @map("createdAt")
+
+  @@map("Order")
 }
 
 enum ListingStatus {

@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:blue_carbon_app/core/theme/app_colors.dart';
 import 'package:blue_carbon_app/data/models/project_model.dart';
+import 'package:blue_carbon_app/data/models/data_upload_model.dart';
+import 'package:blue_carbon_app/data/services/api_service.dart';
 import 'package:blue_carbon_app/presentation/screens/uploads/create_upload_screen.dart';
+import 'package:blue_carbon_app/presentation/screens/uploads/upload_detail_screen.dart';
 import 'package:blue_carbon_app/presentation/widgets/common/custom_button.dart';
+import 'package:blue_carbon_app/presentation/widgets/upload/upload_card.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   final ProjectModel project;
@@ -17,6 +21,40 @@ class ProjectDetailScreen extends StatefulWidget {
 class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   int _selectedTabIndex = 0;
   final List<String> _tabs = ['Overview', 'Uploads', 'Verifications', 'Credits'];
+  bool _isLoading = false;
+  List<DataUploadModel> _uploads = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUploads();
+  }
+
+  Future<void> _loadUploads() async {
+    if (_selectedTabIndex != 1) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final api = ApiService();
+      final items = await api.getUploadsByProjectId(widget.project.id);
+      if (!mounted) return;
+      setState(() {
+        _uploads = items;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: AppColors.coralPink),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +99,9 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
               setState(() {
                 _selectedTabIndex = index;
               });
+              if (index == 1) {
+                _loadUploads();
+              }
             },
             child: Container(
               alignment: Alignment.center,
@@ -157,7 +198,7 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
       height: 200,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.oceanFoam,
+        color: AppColors.seaFoam,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.deepOceanBlue.withOpacity(0.2)),
       ),
@@ -243,29 +284,77 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
   }
 
   Widget _buildUploadsTab() {
-    // Placeholder for uploads tab
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.cloud_upload, size: 64, color: AppColors.deepOceanBlue.withOpacity(0.3)),
-          const SizedBox(height: 16),
-          const Text('No uploads yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text('Upload field data to get started', style: TextStyle(color: AppColors.charcoal.withOpacity(0.7))),
-          const SizedBox(height: 24),
-          CustomButton(
-            label: 'Upload Data',
-            icon: Icons.add,
-            width: 200,
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CreateUploadScreen(projectId: widget.project.id)),
-              );
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColors.coastalTeal)),
+      );
+    }
+
+    if (_uploads.isEmpty) {
+      return RefreshIndicator(
+        onRefresh: _loadUploads,
+        color: AppColors.coastalTeal,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.cloud_upload, size: 64, color: AppColors.deepOceanBlue.withOpacity(0.3)),
+                        const SizedBox(height: 16),
+                        const Text('No uploads yet', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        Text('Upload field data to get started',
+                            style: TextStyle(color: AppColors.charcoal.withOpacity(0.7))),
+                        const SizedBox(height: 24),
+                        CustomButton(
+                          label: 'Upload Data',
+                          icon: Icons.add,
+                          width: 200,
+                          onPressed: () async {
+                            final created = await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => CreateUploadScreen(projectId: widget.project.id)),
+                            );
+                            if (created == true) {
+                              _loadUploads();
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadUploads,
+      color: AppColors.coastalTeal,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: _uploads.length,
+        itemBuilder: (context, index) {
+          final upload = _uploads[index];
+          return UploadCard(
+            upload: upload,
+            onTap: () async {
+              await Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => UploadDetailScreen(upload: upload)));
+              _loadUploads();
             },
-          ),
-        ],
+          );
+        },
       ),
     );
   }
