@@ -49,7 +49,27 @@ class ApiService {
   Future<AuthResponse> login(LoginRequest request) async {
     try {
       final response = await _dio.post(ApiConstants.login, data: request.toJson());
-      return AuthResponse.fromJson(response.data);
+
+      // Backend returns { token } or { error }
+      final data = response.data as Map<String, dynamic>;
+      if (data.containsKey('error')) {
+        throw Exception(data['error'] as String);
+      }
+
+      final token = data['token'] as String;
+      final payload = _decodeJwtPayload(token);
+
+      // Build a minimal UserModel from JWT claims
+      final roleClaim = (payload['role'] as String?) ?? 'MEMBER';
+      final user = UserModel(
+        id: (payload['sub'] ?? payload['userId'] ?? '') as String,
+        email: (payload['email'] ?? '') as String,
+        role: _mapUserRole(roleClaim),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      return AuthResponse(accessToken: token, user: user);
     } catch (e) {
       throw _handleError(e);
     }
@@ -57,8 +77,9 @@ class ApiService {
 
   Future<AuthResponse> signup(SignupRequest request) async {
     try {
-      final response = await _dio.post(ApiConstants.signup, data: request.toJson());
-      return AuthResponse.fromJson(response.data);
+      // Backend does not have a separate signup; reuse login with email + code
+      final loginReq = LoginRequest(email: request.email, code: request.code);
+      return await login(loginReq);
     } catch (e) {
       throw _handleError(e);
     }
@@ -142,7 +163,15 @@ class ApiService {
         options: Options(contentType: 'multipart/form-data'),
       );
 
-      return DataUploadModel.fromJson(response.data);
+      // Backend returns only { id, sha256, path, cid } on upload
+      final id = (response.data as Map<String, dynamic>)['id'] as String?;
+      if (id == null) {
+        throw Exception('Upload failed: no id returned');
+      }
+
+      // Fetch full metadata
+      final meta = await _dio.get('${ApiConstants.uploadById}$id');
+      return DataUploadModel.fromJson(meta.data as Map<String, dynamic>);
     } catch (e) {
       throw _handleError(e);
     }
@@ -160,21 +189,15 @@ class ApiService {
   // Verification methods
   Future<VerificationModel> createVerification(Map<String, dynamic> data) async {
     try {
-      final response = await _dio.post(ApiConstants.verifications, data: data);
+      // Backend exposes verification under /v1/registry/verify
+      final response = await _dio.post('${ApiConstants.registry}/verify', data: data);
       return VerificationModel.fromJson(response.data);
     } catch (e) {
       throw _handleError(e);
     }
   }
 
-  Future<VerificationModel> anchorVerification(String id) async {
-    try {
-      final response = await _dio.post('${ApiConstants.verificationById}$id${ApiConstants.anchorVerification}');
-      return VerificationModel.fromJson(response.data);
-    } catch (e) {
-      throw _handleError(e);
-    }
-  }
+  // No separate anchor endpoint in backend; anchoring is part of verification payload
 
   // Error handling
   Exception _handleError(dynamic error) {
@@ -198,5 +221,33 @@ class ApiService {
     }
 
     return Exception('Something went wrong. Please try again later.');
+  }
+
+  // Helpers
+  Map<String, dynamic> _decodeJwtPayload(String token) {
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return <String, dynamic>{};
+      final normalized = base64Url.normalize(parts[1]);
+      final payloadString = utf8.decode(base64Url.decode(normalized));
+      final decoded = jsonDecode(payloadString);
+      return decoded is Map<String, dynamic> ? decoded : <String, dynamic>{};
+    } catch (_) {
+      return <String, dynamic>{};
+    }
+  }
+
+  UserRole _mapUserRole(String role) {
+    switch (role.toUpperCase()) {
+      case 'ADMIN':
+        return UserRole.admin;
+      case 'ORG_ADMIN':
+        return UserRole.orgAdmin;
+      case 'VERIFIER':
+        return UserRole.verifier;
+      case 'MEMBER':
+      default:
+        return UserRole.member;
+    }
   }
 }

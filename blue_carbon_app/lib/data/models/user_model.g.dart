@@ -23,8 +23,8 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
     };
 
 const _$UserRoleEnumMap = {
-  UserRole.admin: 'admin',
-  UserRole.orgAdmin: 'orgAdmin',
-  UserRole.member: 'member',
-  UserRole.verifier: 'verifier',
+  UserRole.admin: 'ADMIN',
+  UserRole.orgAdmin: 'ORG_ADMIN',
+  UserRole.member: 'MEMBER',
+  UserRole.verifier: 'VERIFIER',
 };

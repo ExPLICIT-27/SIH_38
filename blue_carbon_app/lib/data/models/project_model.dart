@@ -3,7 +3,13 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'project_model.g.dart';
 
-enum ProjectStatus { draft, approved }
+@JsonEnum(alwaysCreate: true)
+enum ProjectStatus {
+  @JsonValue('DRAFT')
+  draft,
+  @JsonValue('APPROVED')
+  approved,
+}
 
 @JsonSerializable()
 class ProjectModel extends Equatable {

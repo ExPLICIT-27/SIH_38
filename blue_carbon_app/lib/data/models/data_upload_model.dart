@@ -3,7 +3,15 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'data_upload_model.g.dart';
 
-enum UploadStatus { pending, pinned, failed }
+@JsonEnum(alwaysCreate: true)
+enum UploadStatus {
+  @JsonValue('PENDING')
+  pending,
+  @JsonValue('PINNED')
+  pinned,
+  @JsonValue('FAILED')
+  failed,
+}
 
 @JsonSerializable()
 class DataUploadModel extends Equatable {
@@ -39,16 +47,16 @@ class DataUploadModel extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    userId,
-    fileName,
-    storagePath,
-    sha256,
-    size,
-    capturedAt,
-    metadata,
-    cid,
-    status,
-    createdAt,
-  ];
+        id,
+        userId,
+        fileName,
+        storagePath,
+        sha256,
+        size,
+        capturedAt,
+        metadata,
+        cid,
+        status,
+        createdAt,
+      ];
 }

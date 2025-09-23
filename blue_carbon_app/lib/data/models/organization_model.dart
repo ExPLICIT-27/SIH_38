@@ -3,7 +3,15 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'organization_model.g.dart';
 
-enum OrganizationMode { seller, buyer, both }
+@JsonEnum(alwaysCreate: true)
+enum OrganizationMode {
+  @JsonValue('SELLER')
+  seller,
+  @JsonValue('BUYER')
+  buyer,
+  @JsonValue('BOTH')
+  both,
+}
 
 @JsonSerializable()
 class OrganizationModel extends Equatable {

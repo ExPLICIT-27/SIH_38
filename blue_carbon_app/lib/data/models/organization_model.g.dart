@@ -6,8 +6,7 @@ part of 'organization_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-OrganizationModel _$OrganizationModelFromJson(Map<String, dynamic> json) =>
-    OrganizationModel(
+OrganizationModel _$OrganizationModelFromJson(Map<String, dynamic> json) => OrganizationModel(
       id: json['id'] as String,
       name: json['name'] as String,
       type: json['type'] as String,
@@ -17,8 +16,7 @@ OrganizationModel _$OrganizationModelFromJson(Map<String, dynamic> json) =>
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$OrganizationModelToJson(OrganizationModel instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$OrganizationModelToJson(OrganizationModel instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'type': instance.type,
@@ -29,7 +27,7 @@ Map<String, dynamic> _$OrganizationModelToJson(OrganizationModel instance) =>
     };
 
 const _$OrganizationModeEnumMap = {
-  OrganizationMode.seller: 'seller',
-  OrganizationMode.buyer: 'buyer',
-  OrganizationMode.both: 'both',
+  OrganizationMode.seller: 'SELLER',
+  OrganizationMode.buyer: 'BUYER',
+  OrganizationMode.both: 'BOTH',
 };

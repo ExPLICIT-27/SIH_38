@@ -17,8 +17,7 @@ ProjectModel _$ProjectModelFromJson(Map<String, dynamic> json) => ProjectModel(
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$ProjectModelToJson(ProjectModel instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$ProjectModelToJson(ProjectModel instance) => <String, dynamic>{
       'id': instance.id,
       'orgId': instance.orgId,
       'name': instance.name,
@@ -30,6 +29,6 @@ Map<String, dynamic> _$ProjectModelToJson(ProjectModel instance) =>
     };
 
 const _$ProjectStatusEnumMap = {
-  ProjectStatus.draft: 'draft',
-  ProjectStatus.approved: 'approved',
+  ProjectStatus.draft: 'DRAFT',
+  ProjectStatus.approved: 'APPROVED',
 };

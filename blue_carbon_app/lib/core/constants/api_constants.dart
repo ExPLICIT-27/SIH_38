@@ -9,7 +9,6 @@ class ApiConstants {
 
   /// Authentication endpoints
   static const String login = '/auth/login';
-  static const String signup = '/auth/signup';
   static const String requestOtp = '/auth/request-otp';
 
   /// Organization endpoints
@@ -25,12 +24,8 @@ class ApiConstants {
   static const String uploads = '/uploads';
   static const String uploadById = '/uploads/';
 
-  /// Verification endpoints
-  static const String verifications = '/verifications';
-  static const String verificationById = '/verifications/';
-  static const String anchorVerification = '/anchor';
-
-  /// Registry endpoints
+  /// Verification/Registry endpoints
+  // Verifications are handled under registry in backend
   static const String registry = '/registry';
   static const String registryProjects = '/registry/projects/';
   static const String registryBatches = '/registry/batches/';
