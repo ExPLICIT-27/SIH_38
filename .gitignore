@@ -1,0 +1,7 @@
+.DS_Store
+.idea
+.vscode
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-plugins-dependencies.lock
+.flutter-plugins-dependencies.lock
