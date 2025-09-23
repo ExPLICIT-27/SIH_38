@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:blue_carbon_app/core/theme/app_colors.dart';
 import 'package:blue_carbon_app/data/models/project_model.dart';
+import 'package:blue_carbon_app/data/services/api_service.dart';
 import 'package:blue_carbon_app/presentation/screens/projects/create_project_screen.dart';
 import 'package:blue_carbon_app/presentation/screens/projects/project_detail_screen.dart';
 import 'package:blue_carbon_app/presentation/widgets/project/project_card.dart';
@@ -24,44 +25,23 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
   }
 
   Future<void> _loadProjects() async {
-    // TODO: Replace with actual API call
-    await Future.delayed(const Duration(seconds: 1));
-
-    setState(() {
-      _projects = [
-        ProjectModel(
-          id: '1',
-          orgId: '1',
-          name: 'Mangrove Restoration - Sundarbans',
-          type: 'Mangrove',
-          areaHa: 150.5,
-          status: ProjectStatus.approved,
-          createdAt: DateTime.now().subtract(const Duration(days: 60)),
-          updatedAt: DateTime.now().subtract(const Duration(days: 30)),
-        ),
-        ProjectModel(
-          id: '2',
-          orgId: '1',
-          name: 'Seagrass Conservation - Gulf of Mannar',
-          type: 'Seagrass',
-          areaHa: 75.2,
-          status: ProjectStatus.approved,
-          createdAt: DateTime.now().subtract(const Duration(days: 45)),
-          updatedAt: DateTime.now().subtract(const Duration(days: 20)),
-        ),
-        ProjectModel(
-          id: '3',
-          orgId: '1',
-          name: 'Saltmarsh Restoration - Chilika Lake',
-          type: 'Saltmarsh',
-          areaHa: 95.8,
-          status: ProjectStatus.draft,
-          createdAt: DateTime.now().subtract(const Duration(days: 15)),
-          updatedAt: DateTime.now().subtract(const Duration(days: 5)),
-        ),
-      ];
-      _isLoading = false;
-    });
+    try {
+      final api = ApiService();
+      final items = await api.getProjects();
+      if (!mounted) return;
+      setState(() {
+        _projects = items;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: AppColors.coralPink),
+      );
+    }
   }
 
   List<ProjectModel> get _filteredProjects {
@@ -147,8 +127,15 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.coastalTeal,
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateProjectScreen()));
+        onPressed: () async {
+          final created =
+              await Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateProjectScreen()));
+          if (created == true) {
+            setState(() {
+              _isLoading = true;
+            });
+            await _loadProjects();
+          }
         },
         icon: const Icon(Icons.add, color: AppColors.pearlWhite),
         label: const Text(

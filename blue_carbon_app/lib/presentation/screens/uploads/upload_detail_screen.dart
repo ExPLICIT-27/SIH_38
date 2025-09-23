@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:blue_carbon_app/core/theme/app_colors.dart';
 import 'package:blue_carbon_app/data/models/data_upload_model.dart';
 import 'package:blue_carbon_app/presentation/widgets/common/custom_button.dart';
+import 'package:blue_carbon_app/data/services/api_service.dart';
 
 class UploadDetailScreen extends StatelessWidget {
   final DataUploadModel upload;
@@ -36,11 +37,21 @@ class UploadDetailScreen extends StatelessWidget {
               CustomButton(
                 label: 'Request Verification',
                 icon: Icons.verified,
-                onPressed: () {
-                  // TODO: Implement verification request
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Verification request sent'), backgroundColor: Colors.green),
-                  );
+                onPressed: () async {
+                  try {
+                    final api = ApiService();
+                    await api.createVerification({'uploadId': upload.id});
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Verification request sent'), backgroundColor: Colors.green),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: Colors.red));
+                    }
+                  }
                 },
               ),
           ],

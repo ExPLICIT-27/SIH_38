@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:blue_carbon_app/core/theme/app_colors.dart';
 import 'package:blue_carbon_app/presentation/widgets/common/custom_button.dart';
 import 'package:blue_carbon_app/presentation/widgets/common/custom_text_field.dart';
+import 'package:blue_carbon_app/data/services/api_service.dart';
 
 class CreateProjectScreen extends StatefulWidget {
-  const CreateProjectScreen({super.key});
+  final String? orgId;
+
+  const CreateProjectScreen({super.key, this.orgId});
 
   @override
   State<CreateProjectScreen> createState() => _CreateProjectScreenState();
@@ -19,6 +22,16 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
   final List<String> _projectTypes = ['Mangrove', 'Seagrass', 'Saltmarsh'];
 
   bool _isLoading = false;
+  String? _orgId;
+
+  @override
+  void initState() {
+    super.initState();
+    _orgId = widget.orgId;
+    if (_orgId == null) {
+      _ensureOrgId();
+    }
+  }
 
   @override
   void dispose() {
@@ -27,26 +40,57 @@ class _CreateProjectScreenState extends State<CreateProjectScreen> {
     super.dispose();
   }
 
+  Future<void> _ensureOrgId() async {
+    try {
+      final api = ApiService();
+      final orgs = await api.getOrganizations();
+      if (!mounted) return;
+      if (orgs.isNotEmpty) {
+        setState(() {
+          _orgId = orgs.first.id;
+        });
+      }
+    } catch (_) {
+      // Silently ignore; handled at create time
+    }
+  }
+
   Future<void> _createProject() async {
     if (_formKey.currentState?.validate() ?? false) {
+      if (_orgId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Organization is required to create a project'), backgroundColor: Colors.red),
+        );
+        // Try once more to resolve org automatically
+        await _ensureOrgId();
+        return;
+      }
       setState(() {
         _isLoading = true;
       });
-
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TODO: Replace with actual API call
-      if (mounted) {
+      try {
+        final api = ApiService();
+        await api.createProject({
+          'name': _nameController.text.trim(),
+          'type': _selectedType,
+          'areaHa': double.parse(_areaController.text.trim()),
+          'orgId': _orgId,
+          'org_id': _orgId,
+        });
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
-
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Project created successfully'), backgroundColor: Colors.green));
-
-        Navigator.pop(context);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Project created successfully'), backgroundColor: Colors.green));
+        Navigator.pop(context, true);
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: AppColors.coralPink));
       }
     }
   }

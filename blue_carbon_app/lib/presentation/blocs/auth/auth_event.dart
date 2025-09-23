@@ -32,11 +32,21 @@ class SignupEvent extends AuthEvent {
   final String email;
   final String code;
   final String name;
+  final Map<String, dynamic>? organizationData;
+  final OrganizationModel? selectedOrganization;
+  final UserRole selectedRole;
 
-  const SignupEvent(this.email, this.code, this.name);
+  const SignupEvent(
+    this.email,
+    this.code,
+    this.name, {
+    this.organizationData,
+    this.selectedOrganization,
+    this.selectedRole = UserRole.member,
+  });
 
   @override
-  List<Object?> get props => [email, code, name];
+  List<Object?> get props => [email, code, name, organizationData, selectedOrganization, selectedRole];
 }
 
 class LogoutEvent extends AuthEvent {}

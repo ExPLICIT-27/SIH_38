@@ -5,6 +5,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:blue_carbon_app/core/theme/app_colors.dart';
 import 'package:blue_carbon_app/presentation/widgets/common/custom_button.dart';
 import 'package:blue_carbon_app/presentation/widgets/common/custom_text_field.dart';
+import 'package:blue_carbon_app/data/services/api_service.dart';
+import 'package:blue_carbon_app/data/models/project_model.dart';
 
 class CreateUploadScreen extends StatefulWidget {
   final String? projectId;
@@ -25,16 +27,14 @@ class _CreateUploadScreenState extends State<CreateUploadScreen> {
   bool _isLoading = false;
   bool _hasGpsData = true;
 
-  final List<Map<String, String>> _projects = [
-    {'id': '1', 'name': 'Mangrove Restoration - Sundarbans'},
-    {'id': '2', 'name': 'Seagrass Conservation - Gulf of Mannar'},
-    {'id': '3', 'name': 'Saltmarsh Restoration - Chilika Lake'},
-  ];
+  List<ProjectModel> _projects = [];
+  bool _loadingProjects = false;
 
   @override
   void initState() {
     super.initState();
     _selectedProjectId = widget.projectId;
+    _loadProjects();
   }
 
   @override
@@ -42,6 +42,30 @@ class _CreateUploadScreenState extends State<CreateUploadScreen> {
     _locationController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadProjects() async {
+    setState(() {
+      _loadingProjects = true;
+    });
+    try {
+      final api = ApiService();
+      final items = await api.getProjects();
+      if (!mounted) return;
+      setState(() {
+        _projects = items;
+        // Keep preselected projectId if provided and present; else default to first
+        _selectedProjectId = _selectedProjectId ?? (_projects.isNotEmpty ? _projects.first.id : null);
+        _loadingProjects = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loadingProjects = false;
+      });
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: AppColors.coralPink));
+    }
   }
 
   Future<void> _pickFile() async {
@@ -80,21 +104,30 @@ class _CreateUploadScreenState extends State<CreateUploadScreen> {
       setState(() {
         _isLoading = true;
       });
+      try {
+        final api = ApiService();
+        final metadata = <String, dynamic>{
+          'projectId': _selectedProjectId,
+          'notes': _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+          'hasGps': _hasGpsData,
+          if (!_hasGpsData) 'location': _locationController.text.trim(),
+        }..removeWhere((key, value) => value == null || (value is String && value.isEmpty));
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // TODO: Replace with actual API call
-      if (mounted) {
+        await api.uploadFile(_selectedFile!, metadata);
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
-
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('File uploaded successfully'), backgroundColor: Colors.green));
-
-        Navigator.pop(context);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('File uploaded successfully'), backgroundColor: Colors.green));
+        Navigator.pop(context, true);
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: AppColors.coralPink));
       }
     }
   }
@@ -258,26 +291,33 @@ class _CreateUploadScreenState extends State<CreateUploadScreen> {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.deepOceanBlue.withOpacity(0.2)),
           ),
-          child: DropdownButtonFormField<String>(
-            value: _selectedProjectId,
-            isExpanded: true,
-            icon: const Icon(Icons.arrow_drop_down),
-            iconSize: 24,
-            elevation: 16,
-            decoration: const InputDecoration(border: InputBorder.none),
-            style: TextStyle(color: AppColors.charcoal, fontSize: 16),
-            validator: _validateProject,
-            onChanged: (String? newValue) {
-              if (newValue != null) {
-                setState(() {
-                  _selectedProjectId = newValue;
-                });
-              }
-            },
-            items: _projects.map<DropdownMenuItem<String>>((Map<String, String> project) {
-              return DropdownMenuItem<String>(value: project['id'], child: Text(project['name']!));
-            }).toList(),
-          ),
+          child: _loadingProjects
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child:
+                      Center(child: SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+                )
+              : DropdownButtonFormField<String>(
+                  value: _selectedProjectId,
+                  isExpanded: true,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  iconSize: 24,
+                  elevation: 16,
+                  decoration: const InputDecoration(border: InputBorder.none),
+                  style: TextStyle(color: AppColors.charcoal, fontSize: 16),
+                  validator: _validateProject,
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedProjectId = newValue;
+                      });
+                    }
+                  },
+                  items: _projects
+                      .map<DropdownMenuItem<String>>((ProjectModel project) =>
+                          DropdownMenuItem<String>(value: project.id, child: Text(project.name)))
+                      .toList(),
+                ),
         ),
       ],
     );

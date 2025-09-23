@@ -4,7 +4,7 @@ import 'package:blue_carbon_app/core/theme/app_colors.dart';
 import 'package:blue_carbon_app/presentation/blocs/auth/auth_bloc.dart';
 import 'package:blue_carbon_app/presentation/screens/auth/login_screen.dart';
 import 'package:blue_carbon_app/presentation/screens/projects/projects_screen.dart';
-import 'package:blue_carbon_app/presentation/screens/uploads/uploads_screen.dart';
+import 'package:blue_carbon_app/presentation/screens/transactions/transactions_screen.dart';
 import 'package:blue_carbon_app/presentation/screens/profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [const ProjectsScreen(), const UploadsScreen(), const ProfileScreen()];
+  final List<Widget> _screens = [const ProjectsScreen(), const TransactionsScreen(), const ProfileScreen()];
 
   @override
   Widget build(BuildContext context) {
@@ -64,9 +64,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: 'Projects',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.cloud_upload_outlined),
-                  activeIcon: Icon(Icons.cloud_upload, size: 28),
-                  label: 'Uploads',
+                  icon: Icon(Icons.account_balance_wallet_outlined),
+                  activeIcon: Icon(Icons.account_balance_wallet, size: 28),
+                  label: 'Transactions',
                 ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.person_outline),

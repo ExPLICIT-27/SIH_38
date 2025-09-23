@@ -59,7 +59,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onSignup(SignupEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final response = await authRepository.signup(event.email, event.code, event.name);
+      final response = await authRepository.signup(
+        event.email,
+        event.code,
+        event.name,
+        organizationData: event.organizationData,
+        selectedOrganization: event.selectedOrganization,
+        selectedRole: event.selectedRole,
+      );
       emit(AuthAuthenticated(response.user));
     } catch (e) {
       emit(AuthError(e.toString()));

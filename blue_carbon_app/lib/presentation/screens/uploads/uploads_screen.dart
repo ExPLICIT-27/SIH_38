@@ -4,6 +4,7 @@ import 'package:blue_carbon_app/data/models/data_upload_model.dart';
 import 'package:blue_carbon_app/presentation/screens/uploads/create_upload_screen.dart';
 import 'package:blue_carbon_app/presentation/screens/uploads/upload_detail_screen.dart';
 import 'package:blue_carbon_app/presentation/widgets/upload/upload_card.dart';
+import 'package:blue_carbon_app/data/services/api_service.dart';
 
 class UploadsScreen extends StatefulWidget {
   const UploadsScreen({super.key});
@@ -24,49 +25,23 @@ class _UploadsScreenState extends State<UploadsScreen> {
   }
 
   Future<void> _loadUploads() async {
-    // TODO: Replace with actual API call
-    await Future.delayed(const Duration(seconds: 1));
-
-    setState(() {
-      _uploads = [
-        DataUploadModel(
-          id: '1',
-          fileName: 'mangrove_survey_data.zip',
-          storagePath: '/uploads/mangrove_survey_data.zip',
-          sha256: 'a1b2c3d4e5f6...',
-          size: 1024 * 1024 * 5, // 5MB
-          capturedAt: DateTime.now().subtract(const Duration(days: 2)),
-          metadata: {'projectId': '1', 'location': 'Sundarbans', 'deviceId': 'ABC123'},
-          cid: 'Qm123456789...',
-          status: UploadStatus.pinned,
-          createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        ),
-        DataUploadModel(
-          id: '2',
-          fileName: 'seagrass_monitoring.zip',
-          storagePath: '/uploads/seagrass_monitoring.zip',
-          sha256: 'f6e5d4c3b2a1...',
-          size: 1024 * 1024 * 3, // 3MB
-          capturedAt: DateTime.now().subtract(const Duration(days: 5)),
-          metadata: {'projectId': '2', 'location': 'Gulf of Mannar', 'deviceId': 'DEF456'},
-          cid: 'Qm987654321...',
-          status: UploadStatus.pinned,
-          createdAt: DateTime.now().subtract(const Duration(days: 5)),
-        ),
-        DataUploadModel(
-          id: '3',
-          fileName: 'saltmarsh_data.zip',
-          storagePath: '/uploads/saltmarsh_data.zip',
-          sha256: '1a2b3c4d5e6f...',
-          size: 1024 * 1024 * 2, // 2MB
-          capturedAt: DateTime.now().subtract(const Duration(hours: 5)),
-          metadata: {'projectId': '3', 'location': 'Chilika Lake', 'deviceId': 'GHI789'},
-          status: UploadStatus.pending,
-          createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-        ),
-      ];
-      _isLoading = false;
-    });
+    try {
+      final api = ApiService();
+      final items = await api.getUploads();
+      if (!mounted) return;
+      setState(() {
+        _uploads = items;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: AppColors.coralPink),
+      );
+    }
   }
 
   List<DataUploadModel> get _filteredUploads {
@@ -96,16 +71,23 @@ class _UploadsScreenState extends State<UploadsScreen> {
               child: _isLoading
                   ? _buildLoadingState()
                   : _filteredUploads.isEmpty
-                  ? _buildEmptyState()
-                  : _buildUploadsList(),
+                      ? _buildEmptyState()
+                      : _buildUploadsList(),
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.coastalTeal,
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateUploadScreen()));
+        onPressed: () async {
+          final created =
+              await Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateUploadScreen()));
+          if (created == true) {
+            setState(() {
+              _isLoading = true;
+            });
+            await _loadUploads();
+          }
         },
         child: const Icon(Icons.add),
       ),

@@ -67,9 +67,65 @@ class AuthRepository {
     return auth;
   }
 
-  Future<AuthResponse> signup(String email, String code, String name) async {
-    // For passwordless, verifying the OTP creates the session (sign-up on demand)
-    return login(email, code);
+  Future<AuthResponse> signup(
+    String email,
+    String code,
+    String name, {
+    Map<String, dynamic>? organizationData,
+    OrganizationModel? selectedOrganization,
+    UserRole selectedRole = UserRole.member,
+  }) async {
+    // First, verify the OTP and create the session
+    final authResponse = await login(email, code);
+
+    try {
+      // After successful authentication, handle organization setup
+      String orgId;
+
+      if (organizationData != null) {
+        // Create new organization
+        final newOrg = await apiService.createOrganization(organizationData);
+        orgId = newOrg.id;
+        debugPrint('[Auth] Created new organization: ${newOrg.id}');
+      } else if (selectedOrganization != null) {
+        // Use existing organization
+        orgId = selectedOrganization.id;
+        debugPrint('[Auth] Using existing organization: ${selectedOrganization.id}');
+      } else {
+        // This shouldn't happen, but handle gracefully
+        throw Exception('No organization specified during signup');
+      }
+
+      // TODO: Create organization membership with role
+      // This would require a backend endpoint like:
+      // POST /v1/orgs/{orgId}/members
+      // Body: { userId: authResponse.user.id, role: selectedRole.name }
+
+      debugPrint(
+          '[Auth] Signup completed for user ${authResponse.user.id} in org $orgId with role ${selectedRole.name}');
+
+      // Update user model with role information
+      final updatedUser = UserModel(
+        id: authResponse.user.id,
+        email: email,
+        role: selectedRole,
+        createdAt: authResponse.user.createdAt,
+        updatedAt: DateTime.now(),
+      );
+
+      final updatedAuth = AuthResponse(
+        accessToken: authResponse.accessToken,
+        user: updatedUser,
+      );
+
+      await _saveAuthData(updatedAuth);
+      return updatedAuth;
+    } catch (orgError) {
+      debugPrint('[Auth] Organization setup failed: $orgError');
+      // If organization setup fails, we still have a valid user session
+      // Let them proceed but show a warning
+      return authResponse;
+    }
   }
 
   Future<void> requestOtp(String email) async {
