@@ -11,6 +11,8 @@ const envSchema = zod_1.z.object({
         .transform((v) => (v ? Number(v) : 3000))
         .pipe(zod_1.z.number().int().min(0).max(65535))
         .default('3000'),
+    JWT_SECRET: zod_1.z.string().default('devsecret'),
+    JWT_EXPIRES_IN: zod_1.z.string().default('1h'),
 });
 function validateEnv(config) {
     const parsed = envSchema.safeParse(config);

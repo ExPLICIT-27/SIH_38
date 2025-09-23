@@ -14,6 +14,13 @@ const app_service_1 = require("./app.service");
 const env_schema_1 = require("./config/env.schema");
 const health_controller_1 = require("./health/health.controller");
 const prisma_service_1 = require("./prisma/prisma.service");
+const auth_module_1 = require("./auth/auth.module");
+const auth_controller_1 = require("./auth/auth.controller");
+const uploads_module_1 = require("./uploads/uploads.module");
+const chain_module_1 = require("./chain/chain.module");
+const orgs_controller_1 = require("./orgs/orgs.controller");
+const projects_controller_1 = require("./projects/projects.controller");
+const registry_controller_1 = require("./registry/registry.controller");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -24,8 +31,11 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
                 validate: (config) => (0, env_schema_1.validateEnv)(config),
             }),
+            auth_module_1.AuthModule,
+            uploads_module_1.UploadsModule,
+            chain_module_1.ChainModule,
         ],
-        controllers: [app_controller_1.AppController, health_controller_1.HealthController],
+        controllers: [app_controller_1.AppController, health_controller_1.HealthController, auth_controller_1.AuthController, orgs_controller_1.OrgsController, projects_controller_1.ProjectsController, registry_controller_1.RegistryController],
         providers: [app_service_1.AppService, prisma_service_1.PrismaService],
     })
 ], AppModule);

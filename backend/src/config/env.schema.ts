@@ -9,6 +9,8 @@ const envSchema = z.object({
     .transform((v) => (v ? Number(v) : 3000))
     .pipe(z.number().int().min(0).max(65535))
     .default('3000' as unknown as number),
+  JWT_SECRET: z.string().default('devsecret'),
+  JWT_EXPIRES_IN: z.string().default('1h'),
 });
 
 export type AppEnv = z.infer<typeof envSchema> & { PORT: number };

@@ -14,15 +14,19 @@ datasource db {
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
+  role          Role     @default(MEMBER)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   organizations OrgMember[]
+  uploads       DataUpload[]
 }
 
 model Organization {
   id        String      @id @default(cuid())
   name      String
   type      String
+  mode      Mode        @default(SELLER)
+  walletAddress String?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   members   OrgMember[]
@@ -48,6 +52,75 @@ model Project {
   orgId     String
   name      String
   type      String
+  areaHa    Float        @default(0)
+  status    ProjectStatus @default(DRAFT)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
+}
+
+enum Role {
+  ADMIN
+  ORG_ADMIN
+  MEMBER
+  VERIFIER
+}
+
+model OtpCode {
+  id         String   @id @default(cuid())
+  email      String
+  code       String
+  expiresAt  DateTime
+  consumed   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([email])
+}
+
+model DataUpload {
+  id           String        @id @default(cuid())
+  user         User?         @relation(fields: [userId], references: [id])
+  userId       String?
+  fileName     String
+  storagePath  String
+  sha256       String
+  size         Int
+  capturedAt   DateTime?
+  metadata     Json?
+  cid          String?
+  status       UploadStatus  @default(PENDING)
+  createdAt    DateTime      @default(now())
+  verifications Verification[]
+}
+
+enum UploadStatus {
+  PENDING
+  PINNED
+  FAILED
+}
+
+enum Mode {
+  SELLER
+  BUYER
+  BOTH
+}
+
+enum ProjectStatus {
+  DRAFT
+  APPROVED
+}
+
+model Setting {
+  key      String  @id
+  value    Json?
+  updatedAt DateTime @updatedAt
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  upload     DataUpload @relation(fields: [uploadId], references: [id])
+  uploadId   String
+  approved   Boolean
+  notes      String?
+  anchoredTx String?
+  createdAt  DateTime @default(now())
 }

@@ -6,6 +6,8 @@ declare const envSchema: z.ZodObject<{
         production: "production";
     }>>;
     PORT: z.ZodDefault<z.ZodPipe<z.ZodPipe<z.ZodString, z.ZodTransform<number, string>>, z.ZodNumber>>;
+    JWT_SECRET: z.ZodDefault<z.ZodString>;
+    JWT_EXPIRES_IN: z.ZodDefault<z.ZodString>;
 }, z.core.$strip>;
 export type AppEnv = z.infer<typeof envSchema> & {
     PORT: number;
