@@ -62,6 +62,9 @@ model Project {
   createdAt DateTime      @default(now()) @map("createdAt")
   updatedAt DateTime      @updatedAt @map("updatedAt")
 
+  // Relations
+  uploads   DataUpload[]
+
   @@map("Project")
 }
 
@@ -90,6 +93,7 @@ model DataUpload {
   userId       String?       @map("userId")
   fileName     String        @map("fileName")
   storagePath  String        @map("storagePath")
+  publicUrl    String?       @map("publicUrl")
   sha256       String
   size         Int
   capturedAt   DateTime?     @map("capturedAt")
@@ -97,6 +101,9 @@ model DataUpload {
   cid          String?
   status       UploadStatus  @default(PENDING)
   createdAt    DateTime      @default(now()) @map("createdAt")
+  // Project relation (optional)
+  project      Project?      @relation(fields: [projectId], references: [id])
+  projectId    String?       @map("projectId")
   verifications Verification[]
 
   @@map("DataUpload")

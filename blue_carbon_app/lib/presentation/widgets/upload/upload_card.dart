@@ -141,10 +141,18 @@ class UploadCard extends StatelessWidget {
 
     switch (upload.status) {
       case UploadStatus.pinned:
-        backgroundColor = AppColors.sequestrationGreen;
-        textColor = AppColors.pearlWhite;
-        label = 'Pinned';
-        icon = Icons.push_pin;
+        // If verified flag present and true, show Verified
+        if (upload.verified == true) {
+          backgroundColor = AppColors.seagrassGreen;
+          textColor = AppColors.pearlWhite;
+          label = 'Verified';
+          icon = Icons.verified;
+        } else {
+          backgroundColor = AppColors.sequestrationGreen;
+          textColor = AppColors.pearlWhite;
+          label = 'Pinned';
+          icon = Icons.push_pin;
+        }
         break;
       case UploadStatus.pending:
         backgroundColor = AppColors.monitoringPurple;

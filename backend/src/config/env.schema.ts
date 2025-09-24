@@ -13,6 +13,9 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('1h'),
   SUPABASE_URL: z.string().url().optional(),
   SUPABASE_JWKS_URL: z.string().url().optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  IPFS_API_URL: z.string().url().default('http://127.0.0.1:5001').optional(),
+  WEB3_STORAGE_TOKEN: z.string().optional(),
 });
 
 export type AppEnv = z.infer<typeof envSchema> & { PORT: number };

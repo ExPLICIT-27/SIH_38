@@ -260,7 +260,7 @@ class _CreateUploadScreenState extends State<CreateUploadScreen> {
                   onPressed: _pickFile,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 10),
               Expanded(
                 child: CustomButton(
                   label: 'Take Photo',

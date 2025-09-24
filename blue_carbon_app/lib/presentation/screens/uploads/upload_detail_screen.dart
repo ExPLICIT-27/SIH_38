@@ -5,6 +5,7 @@ import 'package:blue_carbon_app/core/theme/app_colors.dart';
 import 'package:blue_carbon_app/data/models/data_upload_model.dart';
 import 'package:blue_carbon_app/presentation/widgets/common/custom_button.dart';
 import 'package:blue_carbon_app/data/services/api_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UploadDetailScreen extends StatelessWidget {
   final DataUploadModel upload;
@@ -21,6 +22,22 @@ class UploadDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildFileInfoCard(context),
+            const SizedBox(height: 12),
+            if ((upload.publicUrl ?? '').isNotEmpty)
+              CustomButton(
+                label: 'Open File',
+                icon: Icons.open_in_new,
+                onPressed: () async {
+                  final uri = Uri.parse(upload.publicUrl!);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Could not open file'), backgroundColor: Colors.red),
+                    );
+                  }
+                },
+              ),
             const SizedBox(height: 24),
             _buildSectionTitle('Upload Details'),
             _buildDetailsCard(context),
@@ -127,6 +144,10 @@ class UploadDetailScreen extends StatelessWidget {
             if (upload.cid != null) ...[
               const Divider(),
               _buildDetailRow(context, 'IPFS CID', upload.cid!, isCopiable: true),
+            ],
+            if ((upload.publicUrl ?? '').isNotEmpty) ...[
+              const Divider(),
+              _buildDetailRow(context, 'Public URL', upload.publicUrl!, isCopiable: true),
             ],
           ],
         ),
