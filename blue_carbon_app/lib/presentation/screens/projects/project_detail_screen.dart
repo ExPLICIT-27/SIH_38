@@ -8,6 +8,7 @@ import 'package:blue_carbon_app/presentation/screens/uploads/create_upload_scree
 import 'package:blue_carbon_app/presentation/screens/uploads/upload_detail_screen.dart';
 import 'package:blue_carbon_app/presentation/widgets/common/custom_button.dart';
 import 'package:blue_carbon_app/presentation/widgets/upload/upload_card.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ProjectDetailScreen extends StatefulWidget {
   final ProjectModel project;
@@ -349,9 +350,17 @@ class _ProjectDetailScreenState extends State<ProjectDetailScreen> {
           return UploadCard(
             upload: upload,
             onTap: () async {
+              final url = upload.publicUrl;
+              if (url != null && url.isNotEmpty) {
+                final uri = Uri.parse(url);
+                final can = await canLaunchUrl(uri);
+                if (can) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  return;
+                }
+              }
               await Navigator.push(
                   context, MaterialPageRoute(builder: (context) => UploadDetailScreen(upload: upload)));
-              _loadUploads();
             },
           );
         },

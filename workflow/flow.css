@@ -1,0 +1,48 @@
+:root {
+  --wire: rgba(122, 162, 255, 0.6);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 8px 0 14px;
+}
+.controls .speed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+}
+.controls input[type="range"] {
+  accent-color: #7aa2ff;
+}
+
+#flowSvg {
+  width: 100%;
+  max-width: 880px;
+}
+
+.flow-block rect {
+  fill: #0e1739;
+  stroke: rgba(255, 255, 255, 0.1);
+}
+.flow-block text {
+  fill: var(--text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
+    "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 14px;
+  dominant-baseline: middle;
+}
+.flow-block.active rect {
+  stroke: url(#acc);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 10px 30px rgba(92, 225, 230, 0.2));
+}
+
+#marker {
+  pointer-events: none;
+}

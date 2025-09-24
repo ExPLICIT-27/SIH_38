@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tech Flow Demo - Blue Carbon MRV</title>
+    <meta
+      name="description"
+      content="Interactive animation showing how data flows through the Blue Carbon MRV tech stack." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="flow.css" />
+  </head>
+  <body>
+    <div id="stars"></div>
+    <header class="site-header">
+      <div class="container">
+        <div class="brand">
+          <img src="assets/logo.svg" alt="Blue Carbon" class="logo" />
+          <span class="brand-name">Blue Carbon MRV</span>
+        </div>
+        <nav class="nav">
+          <a href="index.html#overview">Overview</a>
+          <a href="index.html#workflow">Workflow</a>
+          <a href="index.html#architecture">Architecture</a>
+          <a href="index.html#timeline">Timeline</a>
+          <a href="index.html#tech">Tech Stack</a>
+          <a href="flow.html" aria-current="page">Flow Demo</a>
+        </nav>
+        <button id="themeToggle" aria-label="Toggle dark mode" class="theme-toggle">🌙</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="section" id="flow">
+        <div class="container">
+          <h2>Tech Flow Animation</h2>
+          <p class="lead">
+            Watch an object traverse the stack — from the Flutter app through the API, storage, and
+            on-chain registry. Use the controls to play, pause, or change speed.
+          </p>
+
+          <div class="controls">
+            <button id="playPause" class="btn btn-primary">Play</button>
+            <button id="reset" class="btn btn-ghost">Reset</button>
+            <div class="speed">
+              <span>Speed</span>
+              <input type="range" id="speed" min="0.5" max="2" step="0.1" value="1" />
+              <span id="speedVal">1.0x</span>
+            </div>
+          </div>
+
+          <div class="diagram">
+            <svg id="flowSvg" viewBox="0 0 900 440" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="acc" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#5CE1E6" />
+                  <stop offset="1" stop-color="#7AA2FF" />
+                </linearGradient>
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feDropShadow
+                    dx="0"
+                    dy="6"
+                    stdDeviation="8"
+                    flood-color="#5CE1E6"
+                    flood-opacity="0.35" />
+                </filter>
+              </defs>
+
+              <!-- Connection path (wire) -->
+              <path
+                id="flowPath"
+                d="M120 100 C 210 100, 240 100, 330 100
+                       S 530 100, 720 100
+                       S 740 160, 620 160
+                       S 540 220, 520 280
+                       S 480 320, 420 320
+                       S 360 320, 330 320
+                       S 460 320, 560 320"
+                fill="none"
+                stroke="url(#acc)"
+                stroke-opacity="0.6"
+                stroke-width="4" />
+
+              <!-- Moving marker -->
+              <circle id="marker" cx="120" cy="100" r="8" fill="url(#acc)" filter="url(#glow)" />
+
+              <!-- Blocks -->
+              <g id="block-flutter" class="flow-block" transform="translate(60,60)">
+                <rect width="150" height="80" rx="14" />
+                <image href="assets/icons/flutter.svg" x="12" y="12" width="36" height="36" />
+                <text x="60" y="38">Flutter App</text>
+              </g>
+
+              <g id="block-nest" class="flow-block" transform="translate(260,60)">
+                <rect width="150" height="80" rx="14" />
+                <image href="assets/icons/nest.svg" x="12" y="12" width="36" height="36" />
+                <text x="60" y="38">NestJS API</text>
+              </g>
+
+              <g id="block-ipfs" class="flow-block" transform="translate(460,60)">
+                <rect width="150" height="80" rx="14" />
+                <image href="assets/icons/ipfs.svg" x="12" y="12" width="36" height="36" />
+                <text x="60" y="38">IPFS</text>
+              </g>
+
+              <g id="block-pg" class="flow-block" transform="translate(660,60)">
+                <rect width="150" height="80" rx="14" />
+                <image href="assets/icons/postgres.svg" x="12" y="12" width="36" height="36" />
+                <text x="60" y="38">PostgreSQL</text>
+              </g>
+
+              <g id="block-verify" class="flow-block" transform="translate(560,140)">
+                <rect width="170" height="70" rx="14" />
+                <text x="16" y="35">Verification (API)</text>
+              </g>
+
+              <g id="block-anchor" class="flow-block" transform="translate(480,210)">
+                <rect width="200" height="70" rx="14" />
+                <text x="16" y="35">Anchor → Registry (Chain)</text>
+              </g>
+
+              <g id="block-sol" class="flow-block" transform="translate(330,280)">
+                <rect width="180" height="80" rx="14" />
+                <image href="assets/icons/solidity.svg" x="12" y="12" width="36" height="36" />
+                <text x="60" y="38">Mint ERC‑1155</text>
+              </g>
+
+              <g id="block-market" class="flow-block" transform="translate(560,280)">
+                <rect width="160" height="80" rx="14" />
+                <text x="16" y="40">Market (Listings)</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <span>© 2025 Blue Carbon MRV • Built for SIH</span>
+        <a href="#flow" class="back-to-top">Back to top ↑</a>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="flow.js"></script>
+  </body>
+</html>

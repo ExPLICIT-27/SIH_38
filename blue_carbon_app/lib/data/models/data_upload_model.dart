@@ -17,26 +17,32 @@ enum UploadStatus {
 class DataUploadModel extends Equatable {
   final String id;
   final String? userId;
+  final String? projectId;
   final String fileName;
   final String storagePath;
+  final String? publicUrl;
   final String sha256;
   final int size;
   final DateTime? capturedAt;
   final Map<String, dynamic>? metadata;
   final String? cid;
+  final bool? verified;
   final UploadStatus status;
   final DateTime createdAt;
 
   const DataUploadModel({
     required this.id,
     this.userId,
+    this.projectId,
     required this.fileName,
     required this.storagePath,
+    this.publicUrl,
     required this.sha256,
     required this.size,
     this.capturedAt,
     this.metadata,
     this.cid,
+    this.verified,
     required this.status,
     required this.createdAt,
   });
